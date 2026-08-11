@@ -1961,7 +1961,35 @@ function netflixOpen() {
   netflixShowPage(
     netflixIntro
   );
+  const netflixIntroN =
+    document.querySelector(
+      ".netflix-intro-n"
+    );
 
+
+  if (netflixIntroN) {
+
+    netflixIntroN.classList.remove(
+      "netflix-n-fade-out"
+    );
+
+    /*
+      Let the N finish appearing,
+      then fade it completely away.
+    */
+
+    setTimeout(
+      () => {
+
+        netflixIntroN.classList.add(
+          "netflix-n-fade-out"
+        );
+
+      },
+      1250
+    );
+
+  }
 
   /*
     Reset profile message.
