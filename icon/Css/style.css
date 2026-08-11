@@ -4693,3 +4693,38 @@ li>.menu__container>.grid__controling .control_center--grid {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* =========================================================
+   NETFLIX WORDMARK — FINAL INTRO ANIMATION
+   ========================================================= */
+
+/* =========================================================
+   NETFLIX WORDMARK — FINAL INTRO ANIMATION
+   ========================================================= */
+
+.netflix-intro-wordmark {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+
+  animation:
+    netflix-wordmark-reveal 1.45s cubic-bezier(.77, 0, .18, 1) 1.55s forwards;
+}
+
+@keyframes netflix-wordmark-reveal {
+
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateY(8px) scale(0.98);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0) scale(1);
+  }
+}
