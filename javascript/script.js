@@ -1699,10 +1699,10 @@ function lockload() {
     );
 }
 
-
 /********************************************************
- * NETFLIX APP
+ * NETFLIX — PERSONAL EDITION
  ********************************************************/
+
 
 const openNetflixButton =
   document.querySelector(
@@ -1746,6 +1746,18 @@ const netflixProfile =
   );
 
 
+const netflixAddProfile =
+  document.getElementById(
+    "netflix-add-profile"
+  );
+
+
+const netflixProfileMessage =
+  document.getElementById(
+    "netflix-profile-message"
+  );
+
+
 const netflixVideoPlayer =
   document.getElementById(
     "netflix-video-player"
@@ -1764,42 +1776,59 @@ const netflixDescription =
   );
 
 
+const netflixPlayerBack =
+  document.getElementById(
+    "netflix-player-back"
+  );
+
+
+/* =======================================================
+   NETFLIX CONTENT
+   ======================================================= */
+
+
 /*
-  Netflix slideshow.
+  Your 20 photos.
 
-  For now these are examples.
-  Replace/add the files later.
+  The code first tries .jpeg.
 
-  IMPORTANT:
-  Keep the names sequential.
+  If the file doesn't exist,
+  it automatically tries .jpg.
+
+  So these both work:
+
+  netflix/1.jpeg
+  netflix/1.jpg
+
+  netflix/2.jpeg
+  netflix/2.jpg
+
+  etc.
 */
 
-const netflixSlides = [
-  {
-    image:
-      "netflix/slide1.jpg",
+const netflixSlides =
+  Array.from(
+    { length: 20 },
+    (_, index) => {
 
-    description:
-      "A little collection of our favorite moments."
-  },
+      return {
+        image:
+          `netflix/${index + 1}.jpeg`,
 
-  {
-    image:
-      "netflix/slide2.jpg",
+        fallback:
+          `netflix/${index + 1}.jpg`,
 
-    description:
-      "Two happy lil kids, one beautiful story."
-  },
+        description:
+          "A little collection of our favorite moments."
+      };
 
-  {
-    image:
-      "netflix/slide3.jpg",
+    }
+  );
 
-    description:
-      "Some memories deserve their own screen."
-  }
-];
 
+/*
+  Your two future videos.
+*/
 
 const netflixVideos = {
 
@@ -1808,19 +1837,24 @@ const netflixVideos = {
 
   "2":
     "netflix/video2.mp4"
+
 };
 
 
-let netflixSlideIndex =
-  0;
+/* =======================================================
+   STATE
+   ======================================================= */
 
-let netflixSlideTimer =
-  null;
+let netflixSlideIndex = 0;
+
+let netflixSlideTimer = null;
+
+let netflixIntroTimer = null;
 
 
-/*
-  Netflix page navigation
-*/
+/* =======================================================
+   PAGE NAVIGATION
+   ======================================================= */
 
 function netflixShowPage(page) {
 
@@ -1851,36 +1885,48 @@ function netflixShowPage(page) {
     );
 
   }
+
 }
 
 
-/*
-  OPEN NETFLIX
-*/
+/* =======================================================
+   OPEN NETFLIX
+   ======================================================= */
 
 function netflixOpen() {
 
-  if (!netflixApp) return;
+  if (!netflixApp) {
+    return;
+  }
 
 
   /*
-    Make Netflix full screen.
+    Open fullscreen Netflix layer.
   */
 
   netflixApp.classList.add(
     "open"
   );
 
+  netflixApp.style.display = "block";
+  netflixApp.style.visibility = "visible";
+  netflixApp.style.opacity = "1";
+
+  netflixApp.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
 
   /*
-    Hide the normal desktop window
-    behind Netflix.
+    Hide desktop behind Netflix.
   */
 
   if (navbar) {
 
     navbar.style.display =
       "none";
+
   }
 
 
@@ -1888,6 +1934,7 @@ function netflixOpen() {
 
     container.style.display =
       "none";
+
   }
 
 
@@ -1895,6 +1942,7 @@ function netflixOpen() {
 
     launchpad.style.display =
       "none";
+
   }
 
 
@@ -1902,11 +1950,12 @@ function netflixOpen() {
 
     point_launchpad.style.display =
       "none";
+
   }
 
 
   /*
-    Start at Netflix intro.
+    Always start from the beginning.
   */
 
   netflixShowPage(
@@ -1915,39 +1964,29 @@ function netflixOpen() {
 
 
   /*
-    Netflix intro → Who's watching?
+    Reset profile message.
   */
 
-  clearTimeout(
-    window.netflixIntroTimer
-  );
+  if (netflixProfileMessage) {
 
-
-  window.netflixIntroTimer =
-    setTimeout(
-      () => {
-
-        netflixShowPage(
-          netflixProfiles
-        );
-
-      },
-      1800
+    netflixProfileMessage.classList.remove(
+      "show"
     );
-}
 
-
-/*
-  CLOSE NETFLIX
-*/
-
-function netflixClose() {
-
-  if (!netflixApp) return;
+  }
 
 
   /*
-    Stop any playing video.
+    Stop old slideshow.
+  */
+
+  clearInterval(
+    netflixSlideTimer
+  );
+
+
+  /*
+    Stop any old video.
   */
 
   if (netflixVideoPlayer) {
@@ -1959,16 +1998,78 @@ function netflixClose() {
     );
 
     netflixVideoPlayer.load();
+
   }
 
 
   /*
-    Stop slideshow.
+    Intro sequence:
+
+    N
+      ↓
+    NETFLIX
+      ↓
+    but made from my love
+      ↓
+    Who's watching?
   */
+
+  clearTimeout(
+    netflixIntroTimer
+  );
+
+
+  netflixIntroTimer =
+    setTimeout(
+      () => {
+
+        netflixShowPage(
+          netflixProfiles
+        );
+
+      },
+      5200
+    );
+
+}
+
+
+/* =======================================================
+   CLOSE NETFLIX
+   ======================================================= */
+
+function netflixClose() {
+
+  if (!netflixApp) {
+    return;
+  }
+
+
+  clearTimeout(
+    netflixIntroTimer
+  );
+
 
   clearInterval(
     netflixSlideTimer
   );
+
+
+  /*
+    Stop video completely.
+  */
+
+  if (netflixVideoPlayer) {
+
+    netflixVideoPlayer.pause();
+
+    netflixVideoPlayer.removeAttribute(
+      "src"
+    );
+
+    netflixVideoPlayer.load();
+
+  }
 
 
   /*
@@ -1979,6 +2080,16 @@ function netflixClose() {
     "open"
   );
 
+
+  netflixApp.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  /*
+    Reset Netflix state.
+  */
 
   netflixShowPage(
     netflixIntro
@@ -1993,6 +2104,7 @@ function netflixClose() {
 
     navbar.style.display =
       "flex";
+
   }
 
 
@@ -2000,13 +2112,78 @@ function netflixClose() {
 
     container.style.display =
       "flex";
+
   }
+
 }
 
 
-/*
-  START SLIDESHOW
-*/
+/* =======================================================
+   ADD PROFILE MESSAGE
+   ======================================================= */
+
+if (netflixAddProfile) {
+
+  netflixAddProfile.addEventListener(
+    "click",
+    (event) => {
+
+      /*
+        Prevent any profile navigation.
+      */
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+
+      if (
+        !netflixProfileMessage
+      ) {
+        return;
+      }
+
+
+      /*
+        Toggle the message.
+      */
+
+      netflixProfileMessage.classList.toggle(
+        "show"
+      );
+
+    }
+  );
+
+}
+
+
+/* =======================================================
+   OPEN HER PROFILE
+   ======================================================= */
+
+if (netflixProfile) {
+
+  netflixProfile.addEventListener(
+    "click",
+    () => {
+
+      netflixShowPage(
+        netflixHome
+      );
+
+
+      netflixStartSlideshow();
+
+    }
+  );
+
+}
+
+
+/* =======================================================
+   START 20-PHOTO SLIDESHOW
+   ======================================================= */
 
 function netflixStartSlideshow() {
 
@@ -2016,12 +2193,25 @@ function netflixStartSlideshow() {
 
 
   /*
-    Clear any previous slideshow.
+    Stop previous timer.
+  */
+
+  clearInterval(
+    netflixSlideTimer
+  );
+
+
+  /*
+    Clear old images.
   */
 
   netflixSlideshow.innerHTML =
     "";
 
+
+  /*
+    Build all 20 slides.
+  */
 
   netflixSlides.forEach(
     (slide, index) => {
@@ -2037,7 +2227,7 @@ function netflixStartSlideshow() {
 
 
       image.alt =
-        "Netflix featured memory " +
+        "Memory " +
         (index + 1);
 
 
@@ -2050,13 +2240,33 @@ function netflixStartSlideshow() {
         );
 
 
+      /*
+        If .jpeg doesn't exist,
+        automatically try .jpg.
+      */
+
       image.addEventListener(
         "error",
         () => {
 
-          image.classList.add(
-            "asset-missing"
-          );
+          if (
+            image.dataset.fallbackUsed
+          ) {
+
+            image.classList.add(
+              "asset-missing"
+            );
+
+            return;
+
+          }
+
+
+          image.dataset.fallbackUsed =
+            "true";
+
+          image.src =
+            slide.fallback;
 
         }
       );
@@ -2065,21 +2275,30 @@ function netflixStartSlideshow() {
       netflixSlideshow.appendChild(
         image
       );
+
     }
   );
 
 
-  netflixSlideIndex =
-    0;
-
-
-  clearInterval(
-    netflixSlideTimer
-  );
+  netflixSlideIndex = 0;
 
 
   /*
-    Slow, subtle slideshow.
+    Set first description.
+  */
+
+  if (netflixDescription) {
+
+    netflixDescription.textContent =
+      netflixSlides[0].description;
+
+  }
+
+
+  /*
+    7 seconds per photo.
+
+    Very slow and subtle.
   */
 
   if (
@@ -2130,18 +2349,21 @@ function netflixStartSlideshow() {
               netflixSlides[
                 netflixSlideIndex
               ].description;
+
           }
 
         },
         7000
       );
+
   }
+
 }
 
 
-/*
-  OPEN VIDEO
-*/
+/* =======================================================
+   OPEN VIDEO
+   ======================================================= */
 
 function netflixOpenVideo(
   videoNumber
@@ -2161,19 +2383,37 @@ function netflixOpenVideo(
     ];
 
 
-  if (!source) return;
+  if (!source) {
+    return;
+  }
 
 
   /*
-    Set video source.
+    Stop slideshow while watching.
   */
+
+  clearInterval(
+    netflixSlideTimer
+  );
+
+
+  /*
+    Stop previous video.
+  */
+
+  netflixVideoPlayer.pause();
+
 
   netflixVideoPlayer.src =
     source;
 
 
+  netflixVideoPlayer.currentTime =
+    0;
+
+
   /*
-    Show fullscreen player.
+    Open player page.
   */
 
   netflixShowPage(
@@ -2182,24 +2422,32 @@ function netflixOpenVideo(
 
 
   /*
-    Play after user interaction.
+    Start playback.
+
+    Browsers permit this because
+    the function is triggered by
+    the user's click.
   */
 
   netflixVideoPlayer
     .play()
     .catch(
-      () => { }
+      () => {
+        /*
+          Controls remain available
+          if autoplay is blocked.
+        */
+      }
     );
+
 }
 
 
-/*
-  Netflix Dock button
-*/
+/* =======================================================
+   DOCK BUTTON
+   ======================================================= */
 
-if (
-  openNetflixButton
-) {
+if (openNetflixButton) {
 
   openNetflixButton.addEventListener(
     "click",
@@ -2209,39 +2457,60 @@ if (
 }
 
 
-/*
-  Netflix profile
-*/
+/* =======================================================
+   BACK → DESKTOP
+   ======================================================= */
 
-if (
-  netflixProfile
-) {
+document
+  .querySelectorAll(
+    ".netflix-back-to-desktop"
+  )
+  .forEach(
+    (button) => {
 
-  netflixProfile.addEventListener(
-    "click",
-    () => {
-
-      netflixShowPage(
-        netflixHome
+      button.addEventListener(
+        "click",
+        netflixClose
       );
-
-
-      /*
-        Start slideshow only after
-        entering the home screen.
-      */
-
-      netflixStartSlideshow();
 
     }
   );
 
-}
+
+/* =======================================================
+   BACK → PROFILES
+   ======================================================= */
+
+document
+  .querySelectorAll(
+    ".netflix-back-to-profiles"
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          clearInterval(
+            netflixSlideTimer
+          );
 
 
-/*
-  Netflix video cards
-*/
+          netflixShowPage(
+            netflixProfiles
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+/* =======================================================
+   VIDEO CARDS
+   ======================================================= */
 
 document
   .querySelectorAll(
@@ -2265,70 +2534,9 @@ document
   );
 
 
-/*
-  Back to desktop
-*/
-
-document
-  .querySelectorAll(
-    ".netflix-back-to-desktop"
-  )
-  .forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        netflixClose
-      );
-
-    }
-  );
-
-
-/*
-  Back to profiles
-*/
-
-document
-  .querySelectorAll(
-    ".netflix-back-to-profiles"
-  )
-  .forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          /*
-            Stop slideshow when leaving home.
-          */
-
-          clearInterval(
-            netflixSlideTimer
-          );
-
-
-          netflixShowPage(
-            netflixProfiles
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/*
-  Video player back button
-*/
-
-const netflixPlayerBack =
-  document.getElementById(
-    "netflix-player-back"
-  );
-
+/* =======================================================
+   PLAYER BACK BUTTON
+   ======================================================= */
 
 if (netflixPlayerBack) {
 
@@ -2337,8 +2545,8 @@ if (netflixPlayerBack) {
     () => {
 
       /*
-        IMPORTANT:
-        Stop video completely.
+        Pause and completely reset
+        the video.
       */
 
       if (
@@ -2356,19 +2564,80 @@ if (netflixPlayerBack) {
       }
 
 
+      /*
+        Return to Netflix home.
+      */
+
       netflixShowPage(
         netflixHome
       );
 
 
       /*
-        Resume slideshow.
+        Slideshow continues.
       */
 
       netflixStartSlideshow();
 
     }
   );
+
+}
+
+
+/* =======================================================
+   SAFETY — VIDEO CLEANUP
+   ======================================================= */
+
+if (netflixVideoPlayer) {
+
+  netflixVideoPlayer.addEventListener(
+    "ended",
+    () => {
+
+      /*
+        Do not automatically start
+        another video.
+
+        Return control to the user.
+      */
+
+      netflixVideoPlayer.pause();
+
+    }
+  );
+
+}
+
+
+/* =======================================================
+   NETFLIX PROFILE CLICK
+   ======================================================= */
+
+if (netflixProfile) {
+
+  netflixProfile.addEventListener(
+    "click",
+    () => {
+
+      /*
+        Go to home screen.
+      */
+
+      netflixShowPage(
+        netflixHome
+      );
+
+
+      /*
+        Start slideshow.
+      */
+
+      netflixStartSlideshow();
+
+    }
+  );
+
 }
 
 

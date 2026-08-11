@@ -648,50 +648,37 @@
 
 
     <!-- =======================================================
-         NETFLIX
-         ======================================================= -->
+     NETFLIX
+     ======================================================= -->
 
-    <div id="netflix-app" class="netflix-app">
+    <div id="netflix-app" class="netflix-app" aria-hidden="true">
 
-      <!-- Netflix Intro -->
+      <!-- =====================================================
+       NETFLIX INTRO
+       ===================================================== -->
 
       <section id="netflix-intro" class="netflix-page netflix-intro-page">
 
-        <div class="netflix-intro-logo">
-          NETFLIX
-        </div>
+        <div class="netflix-intro-content">
 
-      </section>
+          <!-- Animated N -->
+
+          <div class="netflix-intro-n" aria-hidden="true">
+            N
+          </div>
 
 
-      <!-- Who's Watching -->
+          <!-- Netflix wordmark -->
 
-      <section id="netflix-profiles" class="netflix-page netflix-profiles-page">
+          <div class="netflix-intro-wordmark" aria-label="Netflix">
+            NETFLIX
+          </div>
 
-        <button class="netflix-back-button netflix-back-to-desktop" type="button" aria-label="Back">
-          ←
-        </button>
 
-        <div class="netflix-profiles">
+          <!-- Typewriter message -->
 
-          <h1>Who's watching?</h1>
-
-          <div class="netflix-profile" id="netflix-her-profile">
-
-            <div class="netflix-profile-picture">
-
-              <img src="netflix/profile.jpg" alt="Profile" />
-
-            </div>
-
-            <div class="netflix-profile-name">
-              Her Name
-            </div>
-
-            <div class="netflix-profile-detail">
-              Just for you ♡
-            </div>
-
+          <div class="netflix-intro-tagline" id="netflix-intro-tagline">
+            but made from my love
           </div>
 
         </div>
@@ -699,7 +686,81 @@
       </section>
 
 
-      <!-- Netflix Home -->
+      <!-- =====================================================
+       WHO'S WATCHING
+       ===================================================== -->
+
+      <section id="netflix-profiles" class="netflix-page netflix-profiles-page">
+
+        <button class="netflix-back-button netflix-back-to-desktop" type="button" aria-label="Back to desktop">
+          ←
+        </button>
+
+
+        <div class="netflix-profiles">
+
+          <h1>
+            Who's watching?
+          </h1>
+
+
+          <div class="netflix-profile-area">
+
+            <!-- Her profile -->
+
+            <button class="netflix-profile" id="netflix-her-profile" type="button" aria-label="Open profile">
+
+              <div class="netflix-profile-picture">
+
+                <img src="netflix/profile.jpg" alt="Her profile" />
+
+              </div>
+
+
+              <div class="netflix-profile-name">
+                Her Name
+              </div>
+
+
+              <div class="netflix-profile-detail">
+                Just for you ♡
+              </div>
+
+            </button>
+
+
+            <!-- Add profile -->
+
+            <button class="netflix-add-profile" id="netflix-add-profile" type="button" aria-label="Add profile">
+
+              <span class="netflix-add-icon">
+                +
+              </span>
+
+              <span class="netflix-add-label">
+                Add Profile
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <!-- No other profile message -->
+
+          <div class="netflix-profile-message" id="netflix-profile-message" aria-live="polite">
+            no other profiles can be created,<br />
+            its just for you my love
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+       NETFLIX HOME
+       ===================================================== -->
 
       <section id="netflix-home" class="netflix-page netflix-home-page">
 
@@ -709,18 +770,25 @@
             NETFLIX
           </div>
 
-          <button class="netflix-back-button netflix-back-to-profiles" type="button" aria-label="Back">
+
+          <button class="netflix-back-button netflix-back-to-profiles" type="button" aria-label="Back to profiles">
             ←
           </button>
 
         </header>
 
 
+        <!-- ===================================================
+         FEATURED SLIDESHOW
+         =================================================== -->
+
         <section class="netflix-featured" id="netflix-featured">
 
           <div class="netflix-slideshow" id="netflix-slideshow"></div>
 
+
           <div class="netflix-featured-overlay"></div>
+
 
           <div class="netflix-featured-content">
 
@@ -728,9 +796,11 @@
               FEATURED
             </div>
 
+
             <h1>
               2 happy lil kids
             </h1>
+
 
             <p id="netflix-featured-description">
               A little collection of our favorite moments.
@@ -740,6 +810,10 @@
 
         </section>
 
+
+        <!-- ===================================================
+         VIDEO CARDS
+         =================================================== -->
 
         <section class="netflix-videos">
 
@@ -753,8 +827,9 @@
 
             </div>
 
+
             <div class="netflix-video-title">
-              Video One
+              Our little story
             </div>
 
           </button>
@@ -770,8 +845,9 @@
 
             </div>
 
+
             <div class="netflix-video-title">
-              Video Two
+              Another little memory
             </div>
 
           </button>
@@ -781,65 +857,21 @@
       </section>
 
 
-      <!-- Fullscreen Video -->
+      <!-- =====================================================
+       FULLSCREEN VIDEO PLAYER
+       ===================================================== -->
 
       <section id="netflix-player" class="netflix-page netflix-player-page">
 
         <button id="netflix-player-back" class="netflix-back-button netflix-player-back" type="button"
-          aria-label="Back">
+          aria-label="Back to Netflix">
           ←
         </button>
+
 
         <video id="netflix-video-player" class="netflix-video-player" controls playsinline preload="metadata"></video>
 
       </section>
-
-    </div>
-
-
-    <!-- Terminal -->
-
-    <div class="window terminal">
-
-      <div class="window__taskbar">
-
-        <div class="window__taskbar--actions">
-
-          <button class="close"></button>
-          <button class="backfull"></button>
-          <button class="full"></button>
-
-        </div>
-
-        <div class="window__taskbar--content">
-          <h2>Terminal</h2>
-        </div>
-
-      </div>
-
-      <div class="terminal_content">
-
-        <p>
-          Last Login : Yesterday on console
-        </p>
-
-        <div class="terminal_line">
-
-          <p>
-
-            <span class="color_green">➜</span>
-            &nbsp;&nbsp;
-
-            <span class="color_blue">~</span>
-            &nbsp;
-
-            <span contenteditable="true" class="cursor"></span>
-
-          </p>
-
-        </div>
-
-      </div>
 
     </div>
 
