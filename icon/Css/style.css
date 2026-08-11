@@ -3480,3 +3480,7 @@ li>.menu__container>.grid__controling .control_center--grid {
 
   object-fit: contain;
 }
+
+.dock .open_netflix:hover::after {
+  bottom: calc(100% + clamp(35px, 0.7vw, 40px));
+}
