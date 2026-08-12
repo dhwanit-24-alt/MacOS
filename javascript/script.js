@@ -2108,6 +2108,9 @@ function netflixClose() {
     "open"
   );
 
+  netflixApp.style.display =
+    "none";
+
 
   netflixApp.setAttribute(
     "aria-hidden",
