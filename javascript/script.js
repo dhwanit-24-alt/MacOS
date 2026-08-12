@@ -472,6 +472,14 @@ if (launchpad) {
   handleOpenLaunching();
 }
 
+/* =========================================================
+   LOVE STORE
+   ========================================================= */
+
+document.querySelector(".open_love_store")?.addEventListener("click", () => {
+  window.location.href = "apps/love-store/love-store.html";
+});
+
 
 if (adding) {
   adding.addEventListener(

@@ -8,6 +8,8 @@ background/*
 # Personal Netflix photos and videos
 netflix/*
 
+# Personal Love Store secrets
+apps/love-store/love-store-secrets.json
 
 # =========================================================
 # KEEP THESE FOLDERS' CODE / STRUCTURE IF NEEDED

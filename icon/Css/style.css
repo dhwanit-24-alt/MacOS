@@ -1238,7 +1238,7 @@ li>.menu__container>.grid__controling .control_center--grid {
 }
 
 .dock .icon:nth-child(3):hover::after {
-  content: "App store";
+  content: "Love store";
 }
 
 .dock .icon:nth-child(4):hover::after {
