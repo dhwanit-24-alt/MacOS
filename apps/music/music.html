@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Music</title>
+
+    <style>
+        /* =========================================================
+           MUSIC APP
+           Birthday + Love themed music player
+           ========================================================= */
+
+        :root {
+            --spotify-green: #1ed760;
+
+            --white: #ffffff;
+            --muted: rgba(255, 255, 255, 0.68);
+
+            --glass:
+                rgba(0, 0, 0, 0.30);
+
+            --glass-strong:
+                rgba(0, 0, 0, 0.48);
+        }
+
+
+        /* =========================================================
+           RESET
+           ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        body {
+            overflow: hidden;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "SF Pro Display",
+                "SF Pro Text",
+                "Helvetica Neue",
+                Arial,
+                sans-serif;
+
+            background: #000;
+
+            color: var(--white);
+        }
+
+
+        button {
+            font: inherit;
+        }
+
+
+        /* =========================================================
+           APP
+           ========================================================= */
+
+        .music-app {
+            position: fixed;
+
+            inset: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            overflow: hidden;
+
+            background: #000;
+
+            opacity: 0;
+
+            visibility: hidden;
+        }
+
+
+        .music-app.visible {
+            visibility: visible;
+
+            animation:
+                app-enter 900ms ease forwards;
+        }
+
+
+        @keyframes app-enter {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+
+        /* =========================================================
+           BACKGROUND
+           ========================================================= */
+
+        .music-background {
+            position: absolute;
+
+            inset: 0;
+
+            background-image:
+                linear-gradient(180deg,
+                    rgba(0, 0, 0, 0.16),
+                    rgba(0, 0, 0, 0.48)),
+                url("background.jpg");
+
+            background-size: cover;
+
+            background-position: center;
+
+            background-repeat: no-repeat;
+
+            transform: scale(1.015);
+
+            z-index: 0;
+        }
+
+
+        .music-background::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                radial-gradient(circle at center,
+                    transparent 20%,
+                    rgba(0, 0, 0, 0.36) 100%);
+        }
+
+
+        /* =========================================================
+           LOVE GLOW
+           ========================================================= */
+
+        .love-glow {
+            position: absolute;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            background:
+                radial-gradient(circle at 50% 45%,
+                    rgba(255, 100, 145, 0.10),
+                    transparent 38%);
+
+            z-index: 1;
+        }
+
+
+        /* =========================================================
+           BACK BUTTON
+           ========================================================= */
+
+        .back-button {
+            position: absolute;
+
+            top: 22px;
+            left: 24px;
+
+            z-index: 50;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding:
+                10px 16px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.15);
+
+            border-radius: 999px;
+
+            color: white;
+
+            background:
+                rgba(0, 0, 0, 0.28);
+
+            backdrop-filter:
+                blur(18px);
+
+            -webkit-backdrop-filter:
+                blur(18px);
+
+            cursor: pointer;
+
+            transition:
+                transform 180ms ease,
+                background 180ms ease;
+        }
+
+
+        .back-button:hover {
+            transform:
+                translateX(-3px);
+
+            background:
+                rgba(0, 0, 0, 0.48);
+        }
+
+
+        .back-button:active {
+            transform:
+                scale(0.95);
+        }
+
+
+        .back-arrow {
+            font-size: 18px;
+        }
+
+
+        .back-text {
+            font-size: 13px;
+
+            font-weight: 650;
+        }
+
+
+        /* =========================================================
+           SPOTIFY MARK
+           ========================================================= */
+
+        .spotify-mark {
+            position: absolute;
+
+            top: 28px;
+            right: 32px;
+
+            z-index: 20;
+
+            width: 30px;
+            height: 30px;
+        }
+
+
+        .spotify-mark svg {
+            width: 100%;
+            height: 100%;
+
+            fill: var(--spotify-green);
+
+            filter:
+                drop-shadow(0 4px 12px rgba(0, 0, 0, 0.28));
+        }
+
+
+        /* =========================================================
+           PLAYER
+           ========================================================= */
+
+        .player {
+            position: relative;
+
+            z-index: 10;
+
+            width: min(1050px,
+                    92vw);
+
+            height: 100vh;
+
+            margin: 0 auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding:
+                70px 20px 45px;
+        }
+
+
+        /* =========================================================
+           LYRICS ARTWORK
+           ========================================================= */
+
+        .artwork-wrap {
+            position: relative;
+
+            width: min(470px,
+                    54vh,
+                    72vw);
+
+            aspect-ratio: 1 / 1;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-bottom: 25px;
+
+            filter:
+                drop-shadow(0 25px 45px rgba(0, 0, 0, 0.38));
+        }
+
+
+        .artwork {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            border-radius: 12px;
+
+            user-select: none;
+
+            -webkit-user-drag: none;
+
+            opacity: 1;
+
+            transform:
+                scale(1);
+
+            transition:
+                opacity 450ms ease,
+                transform 650ms cubic-bezier(.2, .8, .2, 1);
+        }
+
+
+        .artwork.changing {
+            opacity: 0;
+
+            transform:
+                scale(0.96);
+        }
+
+
+        /* =========================================================
+           SONG INFO
+           ========================================================= */
+
+        .song-info {
+            width: min(650px,
+                    88vw);
+
+            text-align: center;
+
+            margin-bottom: 22px;
+        }
+
+
+        .song-title {
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size:
+                clamp(24px,
+                    3vw,
+                    38px);
+
+            font-weight: 500;
+
+            letter-spacing:
+                0.01em;
+
+            line-height: 1.15;
+
+            text-shadow:
+                0 3px 16px rgba(0, 0, 0, 0.35);
+
+            transition:
+                opacity 400ms ease,
+                transform 500ms ease;
+        }
+
+
+        .song-artist {
+            margin-top: 6px;
+
+            font-size: 11px;
+
+            letter-spacing:
+                0.10em;
+
+            text-transform:
+                uppercase;
+
+            color:
+                rgba(255, 255, 255, 0.68);
+        }
+
+
+        /* =========================================================
+           PERSONAL REASON
+           ========================================================= */
+
+        .song-reason {
+            width: min(610px,
+                    88vw);
+
+            margin:
+                0 auto 26px;
+
+            text-align: center;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-style: italic;
+
+            font-size:
+                clamp(14px,
+                    1.5vw,
+                    18px);
+
+            line-height: 1.55;
+
+            color:
+                rgba(255, 255, 255, 0.88);
+
+            text-shadow:
+                0 2px 14px rgba(0, 0, 0, 0.4);
+
+            min-height: 28px;
+
+            transition:
+                opacity 400ms ease,
+                transform 500ms ease;
+        }
+
+
+        /* =========================================================
+           CONTROLS
+           ========================================================= */
+
+        .controls {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 30px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .control {
+            border: none;
+
+            background: transparent;
+
+            color: white;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            transition:
+                transform 180ms ease,
+                opacity 180ms ease;
+        }
+
+
+        .control:hover {
+            transform:
+                scale(1.12);
+        }
+
+
+        .control:active {
+            transform:
+                scale(0.90);
+        }
+
+
+        .previous,
+        .next {
+            width: 35px;
+            height: 35px;
+
+            opacity: 0.84;
+        }
+
+
+        .previous svg,
+        .next svg {
+            width: 22px;
+            height: 22px;
+
+            fill: currentColor;
+        }
+
+
+        .play {
+            width: 58px;
+            height: 58px;
+
+            border-radius: 50%;
+
+            background:
+                white;
+
+            color:
+                #111;
+
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.30);
+        }
+
+
+        .play:hover {
+            transform:
+                scale(1.08);
+        }
+
+
+        .play svg {
+            width: 25px;
+            height: 25px;
+
+            fill: currentColor;
+        }
+
+
+        /* =========================================================
+           PROGRESS
+           ========================================================= */
+
+        .progress-wrap {
+            width: min(560px,
+                    78vw);
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 6px;
+        }
+
+
+        .progress-track {
+            position: relative;
+
+            width: 100%;
+            height: 3px;
+
+            border-radius: 999px;
+
+            background:
+                rgba(255, 255, 255, 0.28);
+
+            cursor: pointer;
+        }
+
+
+        .progress-fill {
+            position: absolute;
+
+            left: 0;
+            top: 0;
+
+            width: 0;
+            height: 100%;
+
+            border-radius: 999px;
+
+            background:
+                white;
+        }
+
+
+        .time {
+            display: flex;
+
+            justify-content: space-between;
+
+            color:
+                rgba(255, 255, 255, 0.62);
+
+            font-size: 8px;
+        }
+
+
+        /* =========================================================
+           SONG COUNT
+           ========================================================= */
+
+        .song-count {
+            margin-top: 13px;
+
+            font-size: 9px;
+
+            letter-spacing:
+                0.12em;
+
+            color:
+                rgba(255, 255, 255, 0.48);
+
+            text-transform:
+                uppercase;
+        }
+
+
+        /* =========================================================
+           INTRO
+           ========================================================= */
+
+        .music-intro {
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 200;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 30px;
+
+            background:
+                #080607;
+
+            opacity: 1;
+
+            transition:
+                opacity 900ms cubic-bezier(.4, 0, .2, 1);
+        }
+
+
+        .music-intro.hidden {
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+
+        .intro-line {
+            max-width:
+                850px;
+
+            text-align: center;
+
+            color:
+                rgba(255, 255, 255, 0.94);
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size:
+                clamp(22px,
+                    3.4vw,
+                    46px);
+
+            font-weight: 400;
+
+            line-height: 1.35;
+
+            letter-spacing:
+                0.01em;
+
+            opacity: 0;
+
+            transform:
+                translateY(15px);
+
+            animation:
+                intro-text-in 1100ms cubic-bezier(.2, .8, .2, 1) 500ms forwards;
+        }
+
+
+        @keyframes intro-text-in {
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        .intro-heart {
+            display: block;
+
+            margin-top: 20px;
+
+            color:
+                #e85b7d;
+
+            font-size: 20px;
+
+            opacity: 0;
+
+            animation:
+                intro-heart-in 900ms ease 1500ms forwards;
+        }
+
+
+        @keyframes intro-heart-in {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    scale(0.7);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    scale(1);
+            }
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 700px) {
+
+            .back-button {
+                top: 14px;
+                left: 14px;
+
+                padding:
+                    8px 12px;
+            }
+
+
+            .back-text {
+                display: none;
+            }
+
+
+            .spotify-mark {
+                top: 17px;
+                right: 18px;
+
+                width: 26px;
+                height: 26px;
+            }
+
+
+            .player {
+                padding:
+                    60px 15px 35px;
+            }
+
+
+            .artwork-wrap {
+                width:
+                    min(76vw,
+                        370px);
+
+                margin-bottom: 20px;
+            }
+
+
+            .song-info {
+                margin-bottom: 16px;
+            }
+
+
+            .song-reason {
+                margin-bottom: 20px;
+            }
+
+
+            .controls {
+                gap: 25px;
+            }
+
+
+            .play {
+                width: 54px;
+                height: 54px;
+            }
+        }
+
+
+        @media (max-height: 700px) {
+
+            .artwork-wrap {
+                width:
+                    min(34vw,
+                        40vh);
+
+                margin-bottom: 14px;
+            }
+
+
+            .song-info {
+                margin-bottom: 10px;
+            }
+
+
+            .song-reason {
+                margin-bottom: 13px;
+
+                font-size: 13px;
+            }
+
+
+            .play {
+                width: 50px;
+                height: 50px;
+            }
+
+
+            .controls {
+                gap: 22px;
+            }
+        }
+
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         INTRO
+         ========================================================= -->
+
+    <section class="music-intro" id="musicIntro">
+
+        <div class="intro-line">
+
+            <h4>21 songs for you, from my heart to yours.</h4> <br>
+            Use airpods for the best experience
+
+            <span class="intro-heart">
+                ♥
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         MUSIC APP
+         ========================================================= -->
+
+    <main class="music-app" id="musicApp">
+
+
+        <!-- =====================================================
+             BACK TO DESKTOP
+             ===================================================== -->
+
+        <button class="back-button" id="backButton" type="button">
+
+            <span class="back-arrow">
+                ←
+            </span>
+
+            <span class="back-text">
+                Back to Desktop
+            </span>
+
+        </button>
+
+
+        <!-- =====================================================
+             BACKGROUND
+             ===================================================== -->
+
+        <div class="music-background" aria-hidden="true"></div>
+
+
+        <div class="love-glow" aria-hidden="true"></div>
+
+
+        <!-- =====================================================
+             PLAYER
+             ===================================================== -->
+
+        <section class="player">
+
+
+            <!-- =================================================
+                 LYRICS SCREENSHOT
+                 ================================================= -->
+
+            <div class="artwork-wrap">
+
+                <img class="artwork" id="artwork" src="" alt="Lyrics" />
+
+            </div>
+
+
+            <!-- =================================================
+                 SONG INFORMATION
+                 ================================================= -->
+
+            <div class="song-info">
+
+                <h1 class="song-title" id="songTitle">
+                    Loading...
+                </h1>
+
+
+                <div class="song-artist" id="songArtist">
+                    Loading...
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PERSONAL REASON
+                 ================================================= -->
+
+            <div class="song-reason" id="songReason">
+                Loading...
+            </div>
+
+
+            <!-- =================================================
+                 CONTROLS
+                 ================================================= -->
+
+            <div class="controls">
+
+
+                <!-- PREVIOUS -->
+
+                <button class="control previous" id="previousButton" type="button" aria-label="Previous song">
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path d="M6 5h2v14H6V5Zm3 7 9-6v12l-9-6Z" />
+
+                    </svg>
+
+                </button>
+
+
+                <!-- PLAY / PAUSE -->
+
+                <button class="control play" id="playButton" type="button" aria-label="Play">
+
+                    <svg id="playIcon" viewBox="0 0 24 24">
+
+                        <path d="M8 5v14l11-7L8 5Z" />
+
+                    </svg>
+
+                </button>
+
+
+                <!-- NEXT -->
+
+                <button class="control next" id="nextButton" type="button" aria-label="Next song">
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path d="M16 5h2v14h-2V5Zm-10 1 9 6-9 6V6Z" />
+
+                    </svg>
+
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROGRESS
+                 ================================================= -->
+
+            <div class="progress-wrap">
+
+                <div class="progress-track" id="progressTrack">
+
+                    <div class="progress-fill" id="progressFill"></div>
+
+                </div>
+
+
+                <div class="time">
+
+                    <span id="currentTime">
+                        0:00
+                    </span>
+
+                    <span id="duration">
+                        0:00
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- SONG COUNT -->
+
+            <div class="song-count" id="songCount">
+                0 / 21
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             AUDIO
+             ===================================================== -->
+
+        <audio id="audio" preload="metadata"></audio>
+
+    </main>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+         ========================================================= -->
+
+    <script>
+
+        (() => {
+
+            "use strict";
+
+
+            /* =====================================================
+               ELEMENTS
+               ===================================================== */
+
+            const intro =
+                document.getElementById(
+                    "musicIntro"
+                );
+
+            const app =
+                document.getElementById(
+                    "musicApp"
+                );
+
+            const backButton =
+                document.getElementById(
+                    "backButton"
+                );
+
+            const audio =
+                document.getElementById(
+                    "audio"
+                );
+
+            const artwork =
+                document.getElementById(
+                    "artwork"
+                );
+
+            const songTitle =
+                document.getElementById(
+                    "songTitle"
+                );
+
+            const songArtist =
+                document.getElementById(
+                    "songArtist"
+                );
+
+            const songReason =
+                document.getElementById(
+                    "songReason"
+                );
+
+            const playButton =
+                document.getElementById(
+                    "playButton"
+                );
+
+            const playIcon =
+                document.getElementById(
+                    "playIcon"
+                );
+
+            const previousButton =
+                document.getElementById(
+                    "previousButton"
+                );
+
+            const nextButton =
+                document.getElementById(
+                    "nextButton"
+                );
+
+            const progressTrack =
+                document.getElementById(
+                    "progressTrack"
+                );
+
+            const progressFill =
+                document.getElementById(
+                    "progressFill"
+                );
+
+            const currentTime =
+                document.getElementById(
+                    "currentTime"
+                );
+
+            const duration =
+                document.getElementById(
+                    "duration"
+                );
+
+            const songCount =
+                document.getElementById(
+                    "songCount"
+                );
+
+
+            /* =====================================================
+               STATE
+               ===================================================== */
+
+            let songs = [];
+
+            let currentSong = 0;
+
+            let isPlaying = false;
+
+            /*
+             * Each song plays twice before moving
+             * automatically to the next song.
+             */
+            let songPlayCount = 0;
+
+            const MAX_PLAYS_PER_SONG = 2;
+
+
+            /* =====================================================
+               FORMAT TIME
+               ===================================================== */
+
+            function formatTime(seconds) {
+
+                if (
+                    !Number.isFinite(seconds)
+                ) {
+                    return "0:00";
+                }
+
+
+                const minutes =
+                    Math.floor(
+                        seconds / 60
+                    );
+
+                const remaining =
+                    Math.floor(
+                        seconds % 60
+                    );
+
+
+                return (
+                    minutes +
+                    ":" +
+                    String(
+                        remaining
+                    ).padStart(
+                        2,
+                        "0"
+                    )
+                );
+            }
+
+
+            /* =====================================================
+               LOAD PRIVATE SONG DATA
+               ===================================================== */
+
+            async function loadMusicData() {
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "./music-secrets.json",
+                            {
+                                cache:
+                                    "no-store"
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Could not load music data: ${response.status}`
+                        );
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !data ||
+                        !Array.isArray(
+                            data.songs
+                        )
+                    ) {
+
+                        throw new Error(
+                            "Invalid music JSON structure."
+                        );
+                    }
+
+
+                    if (
+                        data.songs.length === 0
+                    ) {
+
+                        throw new Error(
+                            "No songs found in music JSON."
+                        );
+                    }
+
+
+                    songs =
+                        data.songs;
+
+
+                    songCount.textContent =
+                        `1 / ${songs.length}`;
+
+
+                    loadSong(
+                        0,
+                        false
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Music data could not be loaded:",
+                        error
+                    );
+
+
+                    songTitle.textContent =
+                        "Music could not be loaded";
+
+                    songArtist.textContent =
+                        "";
+
+                    songReason.textContent =
+                        "Please check music-secrets.json.";
+
+                    songCount.textContent =
+                        "0 / 0";
+                }
+            }
+
+
+            /* =====================================================
+               LOAD SONG
+               ===================================================== */
+
+            function loadSong(
+                index,
+                animate = true
+            ) {
+
+                if (
+                    !songs.length
+                ) {
+                    return;
+                }
+
+
+                currentSong =
+                    (
+                        index +
+                        songs.length
+                    ) %
+                    songs.length;
+
+
+                const song =
+                    songs[
+                    currentSong
+                    ];
+
+
+                if (animate) {
+
+                    artwork.classList.add(
+                        "changing"
+                    );
+                }
+
+
+                const changeDelay =
+                    animate
+                        ? 220
+                        : 0;
+
+
+                setTimeout(
+                    () => {
+
+                        songTitle.textContent =
+                            song.title ||
+                            "Untitled";
+
+                        songArtist.textContent =
+                            song.artist ||
+                            "";
+
+                        songReason.textContent =
+                            song.reason ||
+                            "";
+
+                        artwork.src =
+                            song.lyrics ||
+                            "";
+
+                        audio.src =
+                            song.audio ||
+                            "";
+
+                        songCount.textContent =
+                            `${currentSong + 1} / ${songs.length}`;
+
+
+                        currentTime.textContent =
+                            "0:00";
+
+                        duration.textContent =
+                            "0:00";
+
+                        progressFill.style.width =
+                            "0%";
+
+
+                        audio.load();
+
+
+                        if (animate) {
+
+                            requestAnimationFrame(
+                                () => {
+
+                                    artwork.classList.remove(
+                                        "changing"
+                                    );
+
+                                }
+                            );
+                        }
+
+                    },
+                    changeDelay
+                );
+            }
+
+
+            /* =====================================================
+               PLAY / PAUSE
+               ===================================================== */
+
+            async function togglePlay() {
+
+                if (
+                    !audio.src
+                ) {
+                    return;
+                }
+
+
+                if (
+                    audio.paused
+                ) {
+
+                    try {
+
+                        await audio.play();
+
+                        isPlaying =
+                            true;
+
+                        updatePlayIcon();
+
+                    } catch (error) {
+
+                        console.error(
+                            "Audio could not play:",
+                            error
+                        );
+                    }
+
+                    return;
+                }
+
+
+                audio.pause();
+
+                isPlaying =
+                    false;
+
+                updatePlayIcon();
+            }
+
+
+            /* =====================================================
+               PLAY ICON
+               ===================================================== */
+
+            function updatePlayIcon() {
+
+                if (
+                    isPlaying
+                ) {
+
+                    playIcon.innerHTML = `
+                        <path
+                            d="M7 5h4v14H7V5Zm6 0h4v14h-4V5Z"
+                        />
+                    `;
+
+
+                    playButton.setAttribute(
+                        "aria-label",
+                        "Pause"
+                    );
+
+
+                    return;
+                }
+
+
+                playIcon.innerHTML = `
+                    <path
+                        d="M8 5v14l11-7L8 5Z"
+                    />
+                `;
+
+
+                playButton.setAttribute(
+                    "aria-label",
+                    "Play"
+                );
+            }
+
+
+            /* =====================================================
+               NEXT
+               ===================================================== */
+
+            function nextSong() {
+
+                if (
+                    !songs.length
+                ) {
+                    return;
+                }
+
+
+                const wasPlaying =
+                    !audio.paused;
+
+
+                /*
+                 * Starting a new song always
+                 * resets its two-play counter.
+                 */
+                songPlayCount = 0;
+
+
+                /*
+                 * loadSong() already wraps:
+                 *
+                 * Song 21 + 1 → Song 1
+                 */
+                loadSong(
+                    currentSong + 1
+                );
+
+
+                if (
+                    wasPlaying
+                ) {
+
+                    setTimeout(
+                        () => {
+
+                            audio
+                                .play()
+                                .then(() => {
+
+                                    isPlaying = true;
+
+                                    updatePlayIcon();
+
+                                })
+                                .catch(
+                                    console.error
+                                );
+
+                        },
+                        300
+                    );
+
+                } else {
+
+                    isPlaying = false;
+
+                    updatePlayIcon();
+
+                }
+            }
+
+
+            /* =====================================================
+               PREVIOUS
+               ===================================================== */
+
+            function previousSong() {
+
+                if (
+                    !songs.length
+                ) {
+                    return;
+                }
+
+
+                /*
+                 * If the current song has already
+                 * progressed for more than 3 seconds,
+                 * pressing previous simply restarts it.
+                 */
+
+                if (
+                    audio.currentTime > 3
+                ) {
+
+                    audio.currentTime =
+                        0;
+
+                    return;
+                }
+
+
+                const wasPlaying =
+                    !audio.paused;
+
+                /*
+                 * Previous starts the selected song
+                 * from the beginning of its two-play cycle.
+                 */
+                songPlayCount = 0;
+
+                loadSong(
+                    currentSong - 1
+                );
+
+
+                if (
+                    wasPlaying
+                ) {
+
+                    setTimeout(
+                        () => {
+
+                            audio
+                                .play()
+                                .then(() => {
+
+                                    isPlaying =
+                                        true;
+
+                                    updatePlayIcon();
+
+                                })
+                                .catch(
+                                    console.error
+                                );
+
+                        },
+                        300
+                    );
+
+                } else {
+
+                    isPlaying =
+                        false;
+
+                    updatePlayIcon();
+                }
+            }
+
+
+            /* =====================================================
+               AUDIO PROGRESS
+               ===================================================== */
+
+            audio.addEventListener(
+                "timeupdate",
+                () => {
+
+                    if (
+                        !audio.duration
+                    ) {
+                        return;
+                    }
+
+
+                    const percentage =
+                        (
+                            audio.currentTime /
+                            audio.duration
+                        ) *
+                        100;
+
+
+                    progressFill.style.width =
+                        `${percentage}%`;
+
+
+                    currentTime.textContent =
+                        formatTime(
+                            audio.currentTime
+                        );
+                }
+            );
+
+
+            /* =====================================================
+               AUDIO METADATA
+               ===================================================== */
+
+            audio.addEventListener(
+                "loadedmetadata",
+                () => {
+
+                    duration.textContent =
+                        formatTime(
+                            audio.duration
+                        );
+                }
+            );
+
+
+            /* =====================================================
+               AUDIO FINISHED
+               ===================================================== */
+
+            audio.addEventListener(
+                "ended",
+                () => {
+
+                    /*
+                     * First ending:
+                     * replay the same song.
+                     */
+                    if (
+                        songPlayCount <
+                        MAX_PLAYS_PER_SONG - 1
+                    ) {
+
+                        songPlayCount++;
+
+                        audio.currentTime = 0;
+
+                        audio.play()
+                            .then(() => {
+
+                                isPlaying = true;
+
+                                updatePlayIcon();
+
+                            })
+                            .catch(
+                                console.error
+                            );
+
+                        return;
+                    }
+
+
+                    /*
+                     * Song has now played twice.
+                     * Move to the next song.
+                     */
+                    songPlayCount = 0;
+
+                    nextSong();
+
+                }
+            );
+
+
+            /* =====================================================
+               PROGRESS BAR CLICK
+               ===================================================== */
+
+            progressTrack.addEventListener(
+                "click",
+                (event) => {
+
+                    if (
+                        !audio.duration
+                    ) {
+                        return;
+                    }
+
+
+                    const rect =
+                        progressTrack.getBoundingClientRect();
+
+
+                    const position =
+                        (
+                            event.clientX -
+                            rect.left
+                        ) /
+                        rect.width;
+
+
+                    audio.currentTime =
+                        position *
+                        audio.duration;
+                }
+            );
+
+
+            /* =====================================================
+               BUTTONS
+               ===================================================== */
+
+            playButton.addEventListener(
+                "click",
+                togglePlay
+            );
+
+
+            previousButton.addEventListener(
+                "click",
+                previousSong
+            );
+
+
+            nextButton.addEventListener(
+                "click",
+                nextSong
+            );
+
+
+            /* =====================================================
+               BACK TO DESKTOP
+               ===================================================== */
+
+            function goBackToDesktop() {
+
+                if (
+                    window.history.length > 1
+                ) {
+
+                    window.history.back();
+
+                    return;
+                }
+
+
+                window.location.href =
+                    "../../index.html";
+            }
+
+
+            backButton.addEventListener(
+                "click",
+                goBackToDesktop
+            );
+
+
+            /* =====================================================
+               INTRO → APP
+               ===================================================== */
+
+            setTimeout(
+                async () => {
+
+                    intro.classList.add(
+                        "hidden"
+                    );
+
+
+                    setTimeout(
+                        async () => {
+
+                            app.classList.add(
+                                "visible"
+                            );
+
+
+                            /*
+                             * Song 1 always starts fresh.
+                             */
+                            currentSong = 0;
+
+                            songPlayCount = 0;
+
+                            loadSong(
+                                0,
+                                false
+                            );
+
+
+                            /*
+                             * Start Song 1 automatically.
+                             * The browser may still block autoplay,
+                             * which is outside our control.
+                             */
+                            try {
+
+                                await audio.play();
+
+                                isPlaying = true;
+
+                                updatePlayIcon();
+
+                            } catch (error) {
+
+                                console.log(
+                                    "Autoplay was blocked by the browser.",
+                                    error
+                                );
+
+                                isPlaying = false;
+
+                                updatePlayIcon();
+
+                            }
+
+                        },
+                        500
+                    );
+
+                },
+                3800
+            );
+
+
+            /* =====================================================
+               START
+               ===================================================== */
+
+            loadMusicData();
+
+            updatePlayIcon();
+
+        })();
+
+    </script>
+
+</body>
+
+</html>

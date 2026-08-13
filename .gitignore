@@ -12,6 +12,9 @@ netflix/*
 apps/love-store/love-store-secrets.json
 apps/messages/messages-secrets.json
 apps/messages/profile.jpg
+apps/music/music-secrets.json
+apps/music/songs/*
+apps/music/lyrics/*
 
 # =========================================================
 # KEEP THESE FOLDERS' CODE / STRUCTURE IF NEEDED

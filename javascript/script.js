@@ -491,6 +491,27 @@ document
       "apps/messages/messages.html";
   });
 
+/* =========================================================
+ MUSIC APP
+ ========================================================= */
+
+var open_music =
+  document.querySelector(".open_music");
+
+if (open_music) {
+
+  open_music.addEventListener(
+    "click",
+    function () {
+
+      window.location.href =
+        "apps/music/music.html";
+
+    }
+  );
+
+}
+
 
 if (adding) {
   adding.addEventListener(
