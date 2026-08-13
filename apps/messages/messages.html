@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Messages</title>
+
+    <style>
+        /* =========================================================
+       MESSAGES
+       Premium phone UI — Birthday + Love theme
+       ========================================================= */
+
+        :root {
+            --rose: #df4f70;
+            --rose-dark: #b93455;
+            --rose-soft: #ffe2e9;
+
+            --cream: #fffafc;
+            --screen: #fffdfd;
+
+            --text: #38242b;
+            --muted: #92717b;
+
+            --phone-edge: #292326;
+            --phone-edge-light: #494044;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            overflow: hidden;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "SF Pro Display",
+                "SF Pro Text",
+                "Helvetica Neue",
+                Arial,
+                sans-serif;
+
+            color: var(--text);
+
+            background:
+                radial-gradient(circle at 12% 16%,
+                    rgba(255, 169, 190, 0.24),
+                    transparent 28%),
+                radial-gradient(circle at 88% 18%,
+                    rgba(223, 79, 112, 0.12),
+                    transparent 30%),
+                radial-gradient(circle at 50% 110%,
+                    rgba(255, 221, 230, 0.7),
+                    transparent 43%),
+                linear-gradient(135deg,
+                    #fffafc 0%,
+                    #fff1f5 50%,
+                    #fff9fb 100%);
+        }
+
+        button {
+            font: inherit;
+        }
+
+        /* =========================================================
+       APP
+       ========================================================= */
+
+        .messages-app {
+            position: fixed;
+            inset: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            overflow: hidden;
+
+            opacity: 0;
+
+            animation:
+                app-enter 650ms ease forwards;
+        }
+
+        @keyframes app-enter {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* =========================================================
+       BACK TO DESKTOP
+       ========================================================= */
+
+        .back-button {
+            position: fixed;
+
+            top: 22px;
+            left: 24px;
+
+            z-index: 100;
+
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 10px 16px;
+
+            border:
+                1px solid rgba(185, 52, 85, 0.12);
+
+            border-radius: 999px;
+
+            color: #783346;
+
+            background:
+                rgba(255, 255, 255, 0.58);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            box-shadow:
+                0 8px 28px rgba(101, 36, 56, 0.07);
+
+            cursor: pointer;
+
+            transition:
+                transform 180ms ease,
+                background 180ms ease,
+                box-shadow 180ms ease;
+        }
+
+        .back-button:hover {
+            transform: translateX(-3px);
+
+            background:
+                rgba(255, 255, 255, 0.88);
+
+            box-shadow:
+                0 12px 32px rgba(101, 36, 56, 0.11);
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .back-arrow {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .back-text {
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        /* =========================================================
+       PHONE
+       ========================================================= */
+
+        .phone {
+            position: relative;
+
+            /*
+       * Slimmer portrait ratio.
+       */
+            width: min(382px,
+                    44vh,
+                    76vw);
+
+            height: min(790px,
+                    90vh,
+                    155vw);
+
+            /*
+       * Avoid the old chunky minimum dimensions.
+       */
+            min-width: 280px;
+            min-height: 520px;
+
+            padding: 7px;
+
+            border-radius: 47px;
+
+            background:
+                linear-gradient(145deg,
+                    var(--phone-edge-light),
+                    var(--phone-edge) 38%,
+                    #181518 100%);
+
+            box-shadow:
+                0 38px 80px rgba(78, 27, 43, 0.22),
+                0 12px 28px rgba(38, 20, 27, 0.15),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+
+            transform:
+                translateY(18px) scale(0.97);
+
+            opacity: 0;
+
+            animation:
+                phone-enter 800ms cubic-bezier(.2, .8, .2, 1) 150ms forwards;
+        }
+
+        @keyframes phone-enter {
+            to {
+                transform:
+                    translateY(0) scale(1);
+
+                opacity: 1;
+            }
+        }
+
+        /*
+     * Tiny side buttons.
+     */
+
+        .phone::before {
+            content: "";
+
+            position: absolute;
+
+            left: -2px;
+            top: 132px;
+
+            width: 3px;
+            height: 45px;
+
+            border-radius: 3px;
+
+            background:
+                #555055;
+
+            box-shadow:
+                0 62px 0 #555055,
+                0 86px 0 #555055;
+
+            opacity: 0.8;
+        }
+
+        .phone::after {
+            content: "";
+
+            position: absolute;
+
+            right: -2px;
+            top: 165px;
+
+            width: 3px;
+            height: 72px;
+
+            border-radius: 3px;
+
+            background:
+                #555055;
+
+            opacity: 0.8;
+        }
+
+        /* =========================================================
+       PHONE SCREEN
+       ========================================================= */
+
+        .phone-screen {
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            border-radius: 41px;
+
+            background:
+                var(--screen);
+
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .phone-screen::before {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            pointer-events: none;
+
+            background:
+                radial-gradient(circle at 12% 24%,
+                    rgba(255, 177, 196, 0.12),
+                    transparent 30%),
+                radial-gradient(circle at 92% 68%,
+                    rgba(223, 79, 112, 0.07),
+                    transparent 28%);
+
+            z-index: 0;
+        }
+
+        /* =========================================================
+       DYNAMIC ISLAND
+       ========================================================= */
+
+        .dynamic-island {
+            position: absolute;
+
+            top: 9px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 104px;
+            height: 27px;
+
+            border-radius: 999px;
+
+            background:
+                #111;
+
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.2);
+
+            z-index: 40;
+        }
+
+        .dynamic-island::after {
+            content: "";
+
+            position: absolute;
+
+            right: 18px;
+            top: 8px;
+
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background:
+                #161616;
+
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        /* =========================================================
+       STATUS BAR
+       ========================================================= */
+
+        .status-bar {
+            position: relative;
+
+            height: 42px;
+
+            padding:
+                13px 21px 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            z-index: 20;
+
+            color: #34252b;
+
+            font-size: 10px;
+
+            font-weight: 700;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .signal {
+            font-size: 7px;
+
+            letter-spacing: 1px;
+        }
+
+        .battery {
+            position: relative;
+
+            width: 19px;
+            height: 9px;
+
+            border:
+                1px solid #34252b;
+
+            border-radius: 3px;
+        }
+
+        .battery::before {
+            content: "";
+
+            position: absolute;
+
+            left: 1px;
+            top: 1px;
+
+            width: 13px;
+            height: 5px;
+
+            border-radius: 1.5px;
+
+            background:
+                #34252b;
+        }
+
+        .battery::after {
+            content: "";
+
+            position: absolute;
+
+            right: -3px;
+            top: 2px;
+
+            width: 2px;
+            height: 4px;
+
+            border-radius: 0 1px 1px 0;
+
+            background:
+                #34252b;
+        }
+
+        /* =========================================================
+       CHAT HEADER
+       ========================================================= */
+
+        .chat-header {
+            position: relative;
+
+            z-index: 15;
+
+            height: 86px;
+
+            padding:
+                2px 18px 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-bottom:
+                1px solid rgba(185, 52, 85, 0.08);
+
+            background:
+                rgba(255, 252, 253, 0.76);
+
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .chat-back {
+            position: absolute;
+
+            left: 13px;
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+
+            border-radius: 50%;
+
+            color:
+                var(--rose-dark);
+
+            background:
+                rgba(255, 226, 233, 0.35);
+
+            font-size: 27px;
+
+            font-weight: 300;
+
+            line-height: 1;
+
+            cursor: pointer;
+
+            transition:
+                background 180ms ease,
+                transform 180ms ease;
+        }
+
+        .chat-back:hover {
+            background:
+                rgba(255, 226, 233, 0.7);
+
+            transform:
+                translateY(-50%) translateX(-2px);
+        }
+
+        .contact {
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 3px;
+        }
+
+        .contact-photo {
+            width: 43px;
+            height: 43px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border:
+                2px solid rgba(223, 79, 112, 0.22);
+
+            box-shadow:
+                0 4px 14px rgba(158, 48, 73, 0.11);
+
+            background:
+                #ffe2e9;
+        }
+
+        .contact-name {
+            font-size: 12px;
+
+            font-weight: 750;
+
+            letter-spacing: -0.01em;
+
+            color: #3d272e;
+        }
+
+        .contact-status {
+            display: flex;
+            align-items: center;
+
+            gap: 4px;
+
+            color:
+                #96717c;
+
+            font-size: 8.5px;
+        }
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background:
+                #55b879;
+
+            box-shadow:
+                0 0 0 2px rgba(85, 184, 121, 0.08);
+        }
+
+        /* =========================================================
+       CHAT AREA
+       ========================================================= */
+
+        .chat {
+            position: absolute;
+
+            left: 0;
+            right: 0;
+
+            top: 128px;
+            bottom: 0;
+
+            z-index: 5;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            padding:
+                20px 14px 34px;
+
+            scrollbar-width: none;
+
+            scroll-behavior: smooth;
+        }
+
+        .chat::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* =========================================================
+       BIRTHDAY NOTE
+       ========================================================= */
+
+        .birthday-note {
+            width: fit-content;
+            max-width: 88%;
+
+            margin:
+                2px auto 23px;
+
+            padding:
+                6px 11px;
+
+            border:
+                1px solid rgba(223, 79, 112, 0.08);
+
+            border-radius: 999px;
+
+            color:
+                #a26c7a;
+
+            background:
+                rgba(255, 226, 233, 0.45);
+
+            font-size: 8.5px;
+
+            text-align: center;
+
+            letter-spacing: 0.01em;
+        }
+
+        /* =========================================================
+       MESSAGES
+       ========================================================= */
+
+        .messages {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .message-row {
+            display: flex;
+
+            width: 100%;
+
+            opacity: 0;
+
+            transform:
+                translateY(9px) scale(0.985);
+
+            animation:
+                message-in 420ms cubic-bezier(.2, .8, .2, 1) forwards;
+        }
+
+        @keyframes message-in {
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0) scale(1);
+            }
+        }
+
+        .message-bubble {
+            position: relative;
+
+            max-width: 83%;
+
+            padding:
+                9px 12px;
+
+            border-radius:
+                17px 17px 17px 5px;
+
+            color:
+                #56323d;
+
+            background:
+                linear-gradient(145deg,
+                    #ffe8ee,
+                    #ffdee7);
+
+            border:
+                1px solid rgba(223, 79, 112, 0.07);
+
+            box-shadow:
+                0 3px 10px rgba(126, 47, 68, 0.055);
+
+            font-size: 11.5px;
+
+            line-height: 1.55;
+
+            word-break: break-word;
+        }
+
+        .message-bubble::after {
+            content: "";
+
+            position: absolute;
+
+            left: -4px;
+            bottom: 0;
+
+            width: 9px;
+            height: 9px;
+
+            background:
+                #ffe0e8;
+
+            clip-path:
+                polygon(100% 0,
+                    100% 100%,
+                    0 100%);
+        }
+
+        .message-time {
+            display: block;
+
+            margin-top: 4px;
+
+            color:
+                #a87985;
+
+            font-size: 7.5px;
+
+            text-align: right;
+        }
+
+        /* =========================================================
+       TYPING
+       ========================================================= */
+
+        .typing-row {
+            display: none;
+
+            align-items: flex-end;
+
+            margin-top: 2px;
+        }
+
+        .typing-row.visible {
+            display: flex;
+        }
+
+        .typing-bubble {
+            display: flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+            padding:
+                10px 13px;
+
+            border-radius:
+                17px 17px 17px 5px;
+
+            background:
+                #ffe8ee;
+
+            box-shadow:
+                0 3px 9px rgba(126, 47, 68, 0.05);
+        }
+
+        .typing-dot {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background:
+                #c4778b;
+
+            animation:
+                typing 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: .4;
+            }
+
+            30% {
+                transform: translateY(-3px);
+                opacity: 1;
+            }
+        }
+
+        /* =========================================================
+       END
+       ========================================================= */
+
+        .conversation-end {
+            margin:
+                28px auto 10px;
+
+            text-align: center;
+
+            color:
+                #bb7484;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 11px;
+
+            opacity: 0;
+
+            transform:
+                translateY(7px);
+
+            transition:
+                opacity 700ms ease,
+                transform 700ms ease;
+        }
+
+        .conversation-end.visible {
+            opacity: 1;
+
+            transform:
+                translateY(0);
+        }
+
+        .end-heart {
+            display: block;
+
+            margin-top: 7px;
+
+            color:
+                var(--rose);
+
+            font-size: 17px;
+
+            animation:
+                end-heart 2s ease-in-out infinite;
+        }
+
+        @keyframes end-heart {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.17);
+            }
+        }
+
+        /* =========================================================
+       OUTSIDE DECORATION
+       ========================================================= */
+
+        .floating-decor {
+            position: fixed;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            overflow: hidden;
+
+            z-index: -1;
+        }
+
+        .decor {
+            position: absolute;
+
+            bottom: -40px;
+
+            color:
+                rgba(223, 79, 112, 0.09);
+
+            font-size:
+                clamp(16px, 2vw, 28px);
+
+            animation:
+                float-decoration linear infinite;
+        }
+
+        .decor:nth-child(1) {
+            left: 8%;
+            animation-duration: 13s;
+            animation-delay: -4s;
+        }
+
+        .decor:nth-child(2) {
+            left: 23%;
+            animation-duration: 16s;
+            animation-delay: -9s;
+        }
+
+        .decor:nth-child(3) {
+            left: 76%;
+            animation-duration: 14s;
+            animation-delay: -7s;
+        }
+
+        .decor:nth-child(4) {
+            left: 91%;
+            animation-duration: 17s;
+            animation-delay: -12s;
+        }
+
+        @keyframes float-decoration {
+            0% {
+                transform:
+                    translateY(0) rotate(0deg);
+
+                opacity: 0;
+            }
+
+            15% {
+                opacity: 1;
+            }
+
+            85% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    translateY(-115vh) rotate(22deg);
+
+                opacity: 0;
+            }
+        }
+
+        /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+        @media (max-width: 700px) {
+
+            .phone {
+                width: min(88vw,
+                        370px);
+
+                height: min(88vh,
+                        760px);
+
+                min-width: 270px;
+                min-height: 500px;
+
+                padding: 6px;
+
+                border-radius: 43px;
+            }
+
+            .phone-screen {
+                border-radius: 37px;
+            }
+
+            .back-button {
+                top: 14px;
+                left: 14px;
+
+                padding:
+                    8px 12px;
+            }
+
+            .back-text {
+                display: none;
+            }
+        }
+
+        @media (max-height: 700px) and (min-width: 701px) {
+
+            .phone {
+                width: min(335px,
+                        42vh);
+
+                height: 91vh;
+
+                min-height: 0;
+
+                border-radius: 40px;
+            }
+
+            .phone-screen {
+                border-radius: 34px;
+            }
+
+            .chat {
+                padding-top: 15px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+
+                animation-iteration-count: 1 !important;
+
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =======================================================
+       MESSAGES APP
+       ======================================================= -->
+
+    <main class="messages-app">
+
+        <!-- BACK TO DESKTOP -->
+
+        <button class="back-button" id="backToDesktop" type="button">
+            <span class="back-arrow">←</span>
+
+            <span class="back-text">
+                Back to Desktop
+            </span>
+        </button>
+
+
+        <!-- =====================================================
+         FLOATING LOVE / BIRTHDAY DECOR
+         ===================================================== -->
+
+        <div class="floating-decor" aria-hidden="true">
+            <span class="decor">♡</span>
+            <span class="decor">♥</span>
+            <span class="decor">♡</span>
+            <span class="decor">♥</span>
+        </div>
+
+
+        <!-- =====================================================
+         PHONE
+         ===================================================== -->
+
+        <section class="phone">
+
+            <div class="phone-screen">
+
+                <div class="dynamic-island"></div>
+
+
+                <!-- STATUS BAR -->
+
+                <div class="status-bar">
+
+                    <span id="phoneTime">
+                        9:41
+                    </span>
+
+                    <div class="status-right">
+
+                        <span class="signal">
+                            ●●●
+                        </span>
+
+                        <span>
+                            Wi-Fi
+                        </span>
+
+                        <span class="battery"></span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+             CONTACT HEADER
+             ================================================= -->
+
+                <header class="chat-header">
+
+                    <button class="chat-back" id="phoneBack" type="button" aria-label="Back">
+                        ‹
+                    </button>
+
+                    <div class="contact">
+
+                        <img class="contact-photo" id="contactPhoto" src="" alt="Contact" />
+
+                        <div class="contact-name" id="contactName">
+                            Loading...
+                        </div>
+
+                        <div class="contact-status" id="contactStatus">
+                            <span class="status-dot"></span>
+
+                            <span>
+                                Always here ♡
+                            </span>
+                        </div>
+
+                    </div>
+
+                </header>
+
+
+                <!-- =================================================
+             CHAT
+             ================================================= -->
+
+                <section class="chat" id="chat" aria-label="Conversation">
+
+                    <div class="birthday-note">
+                        ♡ a little birthday message, just for you ♡
+                    </div>
+
+                    <div class="messages" id="messages"></div>
+
+
+                    <!-- TYPING -->
+
+                    <div class="typing-row" id="typingRow">
+
+                        <div class="typing-bubble">
+
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- END -->
+
+                    <div class="conversation-end" id="conversationEnd">
+
+                        That's all for now.
+
+                        <span class="end-heart">
+                            ♥
+                        </span>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+        /* =========================================================
+           MESSAGES
+           Private content comes from messages-secrets.json
+           ========================================================= */
+
+        (() => {
+
+            "use strict";
+
+
+            /* =======================================================
+               ELEMENTS
+               ======================================================= */
+
+            const backButton =
+                document.getElementById(
+                    "backToDesktop"
+                );
+
+            const phoneBack =
+                document.getElementById(
+                    "phoneBack"
+                );
+
+            const contactName =
+                document.getElementById(
+                    "contactName"
+                );
+
+            const contactPhoto =
+                document.getElementById(
+                    "contactPhoto"
+                );
+
+            const contactStatus =
+                document.getElementById(
+                    "contactStatus"
+                );
+
+            const messagesContainer =
+                document.getElementById(
+                    "messages"
+                );
+
+            const typingRow =
+                document.getElementById(
+                    "typingRow"
+                );
+
+            const chat =
+                document.getElementById(
+                    "chat"
+                );
+
+            const conversationEnd =
+                document.getElementById(
+                    "conversationEnd"
+                );
+
+            const phoneTime =
+                document.getElementById(
+                    "phoneTime"
+                );
+
+
+            /* =======================================================
+               BACK TO DESKTOP
+               ======================================================= */
+
+            function goBackToDesktop() {
+
+                if (
+                    window.history.length > 1
+                ) {
+
+                    window.history.back();
+
+                    return;
+
+                }
+
+                window.location.href =
+                    "../../index.html";
+            }
+
+            backButton.addEventListener(
+                "click",
+                goBackToDesktop
+            );
+
+            phoneBack.addEventListener(
+                "click",
+                goBackToDesktop
+            );
+
+
+            /* =======================================================
+               PHONE TIME
+               ======================================================= */
+
+            function updatePhoneTime() {
+
+                const now =
+                    new Date();
+
+                phoneTime.textContent =
+                    now.toLocaleTimeString(
+                        [],
+                        {
+                            hour: "numeric",
+                            minute: "2-digit"
+                        }
+                    );
+
+            }
+
+            updatePhoneTime();
+
+
+            /* =======================================================
+               LOAD PRIVATE DATA
+               ======================================================= */
+
+            async function loadMessages() {
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "./messages-secrets.json",
+                            {
+                                cache: "no-store"
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Could not load messages: ${response.status}`
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !data.contact ||
+                        !Array.isArray(data.messages)
+                    ) {
+
+                        throw new Error(
+                            "Invalid Messages JSON structure."
+                        );
+
+                    }
+
+
+                    /* =================================================
+                       CONTACT
+                       ================================================= */
+
+                    contactName.textContent =
+                        data.contact.name ||
+                        "My Love";
+
+
+                    contactStatus.querySelector(
+                        "span:last-child"
+                    ).textContent =
+                        data.contact.status ||
+                        "Always here ♡";
+
+
+                    if (
+                        data.contact.photo
+                    ) {
+
+                        contactPhoto.src =
+                            data.contact.photo;
+
+                    }
+
+
+                    /* =================================================
+                       MESSAGE SEQUENCE
+                       ================================================= */
+
+                    if (
+                        !data.messages.length
+                    ) {
+
+                        conversationEnd.classList.add(
+                            "visible"
+                        );
+
+                        return;
+
+                    }
+
+
+                    await playMessages(
+                        data.messages
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Messages could not be loaded:",
+                        error
+                    );
+
+                    contactName.textContent =
+                        "My Love";
+
+                    contactStatus.querySelector(
+                        "span:last-child"
+                    ).textContent =
+                        "Always here ♡";
+
+                }
+
+            }
+
+
+            /* =======================================================
+               MESSAGE SEQUENCE
+               ======================================================= */
+
+            async function playMessages(
+                messageList
+            ) {
+
+                for (
+                    let index = 0;
+                    index < messageList.length;
+                    index++
+                ) {
+
+                    const message =
+                        messageList[index];
+
+
+                    const delay =
+                        Number(message.delay) ||
+                        900;
+
+
+                    await wait(delay);
+
+
+                    /* Typing */
+
+                    typingRow.classList.add(
+                        "visible"
+                    );
+
+                    scrollChatToBottom();
+
+
+                    const typingTime =
+                        Number(message.typingTime) ||
+                        850;
+
+
+                    await wait(
+                        typingTime
+                    );
+
+
+                    typingRow.classList.remove(
+                        "visible"
+                    );
+
+
+                    /* Message */
+
+                    addMessage(
+                        message
+                    );
+
+
+                    scrollChatToBottom();
+
+                }
+
+
+                await wait(500);
+
+
+                conversationEnd.classList.add(
+                    "visible"
+                );
+
+
+                scrollChatToBottom();
+
+            }
+
+
+            /* =======================================================
+               ADD MESSAGE
+               ======================================================= */
+
+            function addMessage(
+                message
+            ) {
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+                row.className =
+                    "message-row";
+
+
+                const bubble =
+                    document.createElement(
+                        "div"
+                    );
+
+                bubble.className =
+                    "message-bubble";
+
+
+                bubble.textContent =
+                    message.text || "";
+
+
+                if (
+                    message.time
+                ) {
+
+                    const time =
+                        document.createElement(
+                            "span"
+                        );
+
+                    time.className =
+                        "message-time";
+
+                    time.textContent =
+                        message.time;
+
+                    bubble.appendChild(
+                        time
+                    );
+
+                }
+
+
+                row.appendChild(
+                    bubble
+                );
+
+                messagesContainer.appendChild(
+                    row
+                );
+
+            }
+
+
+            /* =======================================================
+               CHAT SCROLL
+               ======================================================= */
+
+            function scrollChatToBottom() {
+
+                requestAnimationFrame(() => {
+
+                    chat.scrollTo({
+                        top:
+                            chat.scrollHeight,
+
+                        behavior:
+                            "smooth"
+                    });
+
+                });
+
+            }
+
+
+            /* =======================================================
+               WAIT
+               ======================================================= */
+
+            function wait(
+                milliseconds
+            ) {
+
+                return new Promise(
+                    (resolve) => {
+
+                        setTimeout(
+                            resolve,
+                            milliseconds
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* =======================================================
+               START
+               ======================================================= */
+
+            loadMessages();
+
+        })();
+    </script>
+
+</body>
+
+</html>

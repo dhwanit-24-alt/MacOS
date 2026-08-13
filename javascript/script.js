@@ -480,6 +480,17 @@ document.querySelector(".open_love_store")?.addEventListener("click", () => {
   window.location.href = "apps/love-store/love-store.html";
 });
 
+/* =========================================================
+   MESSAGES APP
+   ========================================================= */
+
+document
+  .querySelector(".open_messages")
+  ?.addEventListener("click", () => {
+    window.location.href =
+      "apps/messages/messages.html";
+  });
+
 
 if (adding) {
   adding.addEventListener(

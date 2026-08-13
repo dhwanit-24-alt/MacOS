@@ -10,6 +10,8 @@ netflix/*
 
 # Personal Love Store secrets
 apps/love-store/love-store-secrets.json
+apps/messages/messages-secrets.json
+apps/messages/profile.jpg
 
 # =========================================================
 # KEEP THESE FOLDERS' CODE / STRUCTURE IF NEEDED
