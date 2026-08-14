@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Photos — Our Little Universe</title>
+    <style>
+        :root {
+            --pink: #ff8bab;
+            --gold: #ffe6a8
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden
+        }
+
+        body {
+            background: #010106;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif
+        }
+
+        .photos-app {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            visibility: hidden;
+            opacity: 0;
+            background: radial-gradient(ellipse at 50% 42%, rgba(116, 72, 170, .2), transparent 30%), radial-gradient(ellipse at 18% 72%, rgba(180, 62, 108, .12), transparent 30%), radial-gradient(ellipse at 84% 24%, rgba(73, 64, 160, .13), transparent 28%), radial-gradient(ellipse at center, #17102d, #09091a 38%, #03040d 72%, #010106)
+        }
+
+        .photos-app.visible {
+            visibility: visible;
+            animation: in 1.2s ease forwards
+        }
+
+        @keyframes in {
+            to {
+                opacity: 1
+            }
+        }
+
+        .space,
+        .universe {
+            position: absolute;
+            inset: 0
+        }
+
+        .space {
+            overflow: hidden;
+            pointer-events: none
+        }
+
+        .nebula {
+            position: absolute;
+            width: 75vw;
+            height: 75vw;
+            left: 50%;
+            top: 48%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(125, 65, 180, .16), rgba(75, 45, 140, .08) 28%, transparent 70%);
+            filter: blur(12px);
+            animation: drift 18s ease-in-out infinite alternate
+        }
+
+        @keyframes drift {
+            to {
+                transform: translate(-49%, -51%) scale(1.08)
+            }
+        }
+
+        .nebula2 {
+            position: absolute;
+            width: 55vw;
+            height: 35vw;
+            right: -15vw;
+            bottom: -10vw;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(255, 70, 140, .08), transparent 68%);
+            filter: blur(35px)
+        }
+
+        .bgstar {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 5px #fff;
+            opacity: var(--o);
+            transform: translate(var(--sx), var(--sy));
+            transition: transform 1.2s
+        }
+
+        .orbit {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 1px solid rgba(255, 255, 255, .035);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(var(--r))
+        }
+
+        .o1 {
+            width: 68vw;
+            height: 25vw
+        }
+
+        .o2 {
+            width: 82vw;
+            height: 43vw;
+            transform: translate(-50%, -50%) rotate(-24deg)
+        }
+
+        .o3 {
+            width: 54vw;
+            height: 76vh;
+            transform: translate(-50%, -50%) rotate(61deg)
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            opacity: .22
+        }
+
+        .p1 {
+            width: 75px;
+            height: 75px;
+            right: 8%;
+            top: 17%;
+            background: radial-gradient(circle at 35% 30%, #a78bc8, #493b69 48%, #151020);
+            box-shadow: 0 0 40px rgba(145, 110, 210, .14)
+        }
+
+        .p2 {
+            width: 35px;
+            height: 35px;
+            left: 8%;
+            bottom: 19%;
+            background: radial-gradient(circle at 35% 30%, #e8b5c5, #67404f 55%, #180d15);
+            box-shadow: 0 0 28px rgba(255, 120, 160, .13)
+        }
+
+        .top {
+            position: absolute;
+            z-index: 50;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            padding: 0 28px
+        }
+
+        .back {
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .25);
+            color: #fff;
+            padding: 9px 15px;
+            border-radius: 999px;
+            backdrop-filter: blur(15px);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .back:hover {
+            background: rgba(255, 255, 255, .09);
+            transform: translateX(-3px)
+        }
+
+        .title {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font: 400 17px Georgia, "Times New Roman", serif;
+            letter-spacing: .04em;
+            white-space: nowrap
+        }
+
+        .universe {
+            inset: 75px 0 0;
+            transform: translate(var(--ux, 0), var(--uy, 0));
+            transition: transform 1.2s cubic-bezier(.2, .8, .2, 1)
+        }
+
+        .loading {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .5)
+        }
+
+        .memory {
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            width: 35px;
+            height: 35px;
+            border: 0;
+            padding: 0;
+            background: transparent !important;
+            appearance: none;
+            color: transparent;
+            cursor: pointer;
+            z-index: 10;
+            transform: translate(-50%, -50%) translate(var(--mx, 0), var(--my, 0));
+            transition: transform .65s cubic-bezier(.2, .8, .2, 1), filter .35s
+        }
+
+        .memory:before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            box-shadow: 0 0 5px #fff, 0 0 11px rgba(255, 255, 255, .55), 0 0 20px rgba(190, 170, 255, .32)
+        }
+
+        .star:after {
+            content: "★";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: rgba(255, 255, 255, .92);
+            text-shadow: 0 0 5px #fff, 0 0 12px rgba(190, 170, 255, .75), 0 0 22px rgba(160, 130, 255, .45);
+            transition: transform .4s cubic-bezier(.2, .8, .2, 1), filter .4s
+        }
+
+        .heart:after {
+            content: "♥";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: rgba(255, 139, 175, .96);
+            text-shadow: 0 0 5px rgba(255, 120, 165, .95), 0 0 12px rgba(255, 80, 145, .65), 0 0 22px rgba(255, 70, 145, .35);
+            transition: transform .4s cubic-bezier(.2, .8, .2, 1), filter .4s
+        }
+
+        .memory:hover {
+            z-index: 30;
+            filter: brightness(1.3)
+        }
+
+        .memory:hover:after {
+            transform: translate(-50%, -50%) scale(3);
+            filter: brightness(1.4)
+        }
+
+        .memory:before {
+            transition: transform .35s, opacity .35s
+        }
+
+        .memory:hover:before {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: .18
+        }
+
+        .label {
+            position: absolute;
+            left: 50%;
+            top: calc(100% + 13px);
+            transform: translateX(-50%) translateY(4px);
+            white-space: nowrap;
+            font-size: 8px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .72);
+            opacity: 0;
+            transition: .25s;
+            text-shadow: 0 2px 12px #000;
+            pointer-events: none
+        }
+
+        .memory:hover .label {
+            opacity: 1;
+            transform: translateX(-50%)
+        }
+
+        .center {
+            width: 58px;
+            height: 58px;
+            z-index: 25
+        }
+
+        .center:before {
+            width: 5px;
+            height: 5px;
+            background: #fff4c7;
+            box-shadow: 0 0 8px #fff4c7, 0 0 18px rgba(255, 225, 150, .9), 0 0 38px rgba(255, 205, 100, .65), 0 0 70px rgba(255, 185, 80, .3)
+        }
+
+        .center:after {
+            content: "✦";
+            font-size: 27px;
+            color: var(--gold);
+            text-shadow: 0 0 8px #fff0b4, 0 0 20px rgba(255, 220, 130, .8), 0 0 42px rgba(255, 200, 100, .5);
+            animation: pulse 3s ease-in-out infinite
+        }
+
+        .center:hover:after {
+            transform: translate(-50%, -50%) scale(1.65) rotate(12deg);
+            filter: brightness(1.35)
+        }
+
+        @keyframes pulse {
+            50% {
+                transform: translate(-50%, -50%) scale(1.15) rotate(8deg)
+            }
+        }
+
+        .ripple {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+            animation: ripple 1.5s cubic-bezier(.2, .8, .2, 1) forwards
+        }
+
+        @keyframes ripple {
+            to {
+                width: 260px;
+                height: 260px;
+                opacity: 0
+            }
+        }
+
+        .intro {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #010106;
+            transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        .intro.hidden {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .introtext {
+            text-align: center;
+            padding: 0 24px;
+            font: 400 clamp(23px, 3.5vw, 47px)/1.4 Georgia, "Times New Roman", serif;
+            color: rgba(255, 255, 255, .92);
+            opacity: 0;
+            transform: translateY(16px);
+            animation: rise 1.2s cubic-bezier(.2, .8, .2, 1) .4s forwards
+        }
+
+        .heartintro {
+            display: block;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ff8bab;
+            opacity: 0;
+            animation: heartin .8s ease 1.3s forwards
+        }
+
+        @keyframes rise {
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes heartin {
+            to {
+                opacity: 1
+            }
+        }
+
+        .viewer {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 25px;
+            background: rgba(1, 1, 7, .68);
+            backdrop-filter: blur(10px);
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .55s
+        }
+
+        .viewer.open {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto
+        }
+
+        .close {
+            position: absolute;
+            right: 27px;
+            top: 25px;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .3);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            transition: .2s
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, .1);
+            transform: rotate(90deg)
+        }
+
+        .photo-content {
+            width: min(88vw, 560px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateY(35px) scale(.92) rotate(var(--rot, -1.5deg));
+            transition: transform .75s cubic-bezier(.2, .8, .2, 1)
+        }
+
+        .viewer.open .photo-content {
+            transform: translateY(0) scale(1) rotate(var(--rot, -1.5deg))
+        }
+
+        .polaroid {
+            width: 100%;
+            padding: 18px 18px 58px;
+            background: #f8f5ee;
+            box-shadow: 0 35px 80px rgba(0, 0, 0, .5);
+            border-radius: 2px
+        }
+
+        .photo {
+            width: 100%;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            background: #ddd
+        }
+
+        .photo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            -webkit-user-drag: none
+        }
+
+        .note {
+            margin-top: 22px;
+            max-width: 520px;
+            text-align: center;
+            font: italic clamp(15px, 1.6vw, 20px)/1.55 Georgia, "Times New Roman", serif;
+            color: rgba(255, 255, 255, .9);
+            text-shadow: 0 3px 15px #000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity .65s ease .28s, transform .7s cubic-bezier(.2, .8, .2, 1) .28s
+        }
+
+        .viewer.open .note {
+            opacity: 1;
+            transform: none
+        }
+
+        .date {
+            margin-top: 10px;
+            font-size: 8px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .4)
+        }
+
+        .photo-heart {
+            margin-top: 11px;
+            color: #ff8cab;
+            font-size: 14px;
+            text-shadow: 0 0 15px rgba(255, 100, 150, .4)
+        }
+
+        .nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px
+        }
+
+        .nav button {
+            width: 38px;
+            height: 38px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .3);
+            color: #fff;
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .nav button:hover {
+            background: rgba(255, 255, 255, .1);
+            transform: scale(1.08)
+        }
+
+        .position {
+            font-size: 9px;
+            letter-spacing: .15em;
+            color: rgba(255, 255, 255, .4)
+        }
+
+        @media(max-width:700px) {
+            .top {
+                padding: 0 15px
+            }
+
+            .back {
+                padding: 8px 12px;
+                font-size: 11px
+            }
+
+            .orbit.o1 {
+                width: 100vw;
+                height: 45vw
+            }
+
+            .orbit.o2 {
+                width: 120vw;
+                height: 70vw
+            }
+
+            .orbit.o3 {
+                width: 80vw;
+                height: 110vh
+            }
+
+            .polaroid {
+                padding: 12px 12px 42px
+            }
+
+            .note {
+                font-size: 15px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *:before,
+            *:after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="intro" id="intro">
+        <div class="introtext"><span id="introLine"></span><span class="heartintro">♥</span></div>
+    </section>
+    <main class="photos-app" id="app">
+        <div class="space">
+            <div class="nebula"></div>
+            <div class="nebula2"></div>
+            <div id="backgroundStars"></div>
+            <div class="orbit o1"></div>
+            <div class="orbit o2"></div>
+            <div class="orbit o3"></div>
+            <div class="planet p1"></div>
+            <div class="planet p2"></div>
+        </div>
+        <header class="top"><button class="back" id="back">← Back to Desktop</button>
+            <div class="title">Our Little Universe</div>
+        </header>
+        <section class="universe" id="universe">
+            <div class="loading" id="loading">Creating your universe</div>
+        </section>
+    </main>
+    <section class="viewer" id="viewer">
+        <button class="close" id="close">×</button>
+        <div class="photo-content" id="photoContent">
+            <div class="polaroid">
+                <div class="photo" id="photo"></div>
+            </div>
+            <div class="note" id="note"></div>
+            <div class="date" id="date"></div>
+            <div class="photo-heart">♥</div>
+        </div>
+        <div class="nav"><button id="prev">←</button><span class="position" id="position">01 / 21</span><button
+                id="next">→</button></div>
+    </section>
+    <script>
+        (() => {
+            "use strict";
+            const intro = document.getElementById("intro"), app = document.getElementById("app"), universe = document.getElementById("universe"), stars = document.getElementById("backgroundStars"), loading = document.getElementById("loading"), introLine = document.getElementById("introLine"), viewer = document.getElementById("viewer"), photo = document.getElementById("photo"), note = document.getElementById("note"), date = document.getElementById("date"), position = document.getElementById("position"), content = document.getElementById("photoContent");
+            let memories = [], current = 0;
+            function createStars() { for (let i = 0; i < 180; i++) { const s = document.createElement("span"); s.className = "bgstar"; s.style.left = Math.random() * 100 + "%"; s.style.top = Math.random() * 100 + "%"; s.style.setProperty("--o", (Math.random() * .55 + .12).toFixed(2)); s.style.setProperty("--sx", "0px"); s.style.setProperty("--sy", "0px"); stars.appendChild(s) } }
+            function ripple(el) { const r = el.getBoundingClientRect(), x = document.createElement("div"); x.className = "ripple"; x.style.left = r.left + r.width / 2 + "px"; x.style.top = r.top + r.height / 2 + "px"; document.body.appendChild(x); setTimeout(() => x.remove(), 1500) }
+            function createMemory(m, i) { const b = document.createElement("button"); b.type = "button"; b.className = `memory ${m.type}`; b.style.setProperty("--x", m.x + "%"); b.style.setProperty("--y", m.y + "%"); if (m.type !== "center") { const l = document.createElement("span"); l.className = "label"; l.textContent = m.hover || ""; b.appendChild(l) } b.onclick = () => openPhoto(i); b.onmouseenter = () => ripple(b); universe.appendChild(b) }
+            function render() { const m = memories[current]; photo.innerHTML = ""; const img = document.createElement("img"); img.src = m.image; img.alt = m.hover || "Memory"; img.draggable = false; photo.appendChild(img); note.textContent = m.note || ""; date.textContent = m.date || ""; position.textContent = `${String(current + 1).padStart(2, "0")} / ${String(memories.length).padStart(2, "0")}`; content.style.setProperty("--rot", [-1.7, 1.4, -.8, 2.1, -1.2][current % 5] + "deg") }
+            function openPhoto(i) { current = i; render(); viewer.classList.add("open") }
+            function closePhoto() { viewer.classList.remove("open") }
+            function next() { current = (current + 1) % memories.length; render() }
+            function prev() { current = (current - 1 + memories.length) % memories.length; render() }
+            window.addEventListener("mousemove", e => {
+                const cx = innerWidth / 2,
+                    cy = innerHeight / 2,
+                    tx = (e.clientX - cx) / cx,
+                    ty = (e.clientY - cy) / cy;
+
+                universe.style.setProperty(
+                    "--ux",
+                    tx * -12 + "px"
+                );
+
+                universe.style.setProperty(
+                    "--uy",
+                    ty * -8 + "px"
+                );
+
+                stars.querySelectorAll(".bgstar").forEach((s, i) => {
+                    const d = (i % 5 + 1) / 5;
+
+                    s.style.setProperty(
+                        "--sx",
+                        tx * d * -9 + "px"
+                    );
+
+                    s.style.setProperty(
+                        "--sy",
+                        ty * d * -6 + "px"
+                    );
+                });
+
+                universe.querySelectorAll(".memory").forEach(m => {
+
+                    const r = m.getBoundingClientRect();
+
+                    const dx =
+                        e.clientX -
+                        (r.left + r.width / 2);
+
+                    const dy =
+                        e.clientY -
+                        (r.top + r.height / 2);
+
+                    const dist =
+                        Math.hypot(dx, dy);
+
+                    if (dist < 150) {
+
+                        const q =
+                            1 - dist / 150;
+
+                        const x =
+                            (-dx / Math.max(dist, 1)) *
+                            q *
+                            8;
+
+                        const y =
+                            (-dy / Math.max(dist, 1)) *
+                            q *
+                            8;
+
+                        m.style.setProperty(
+                            "--mx",
+                            x + "px"
+                        );
+
+                        m.style.setProperty(
+                            "--my",
+                            y + "px"
+                        );
+
+                    } else {
+
+                        m.style.setProperty(
+                            "--mx",
+                            "0px"
+                        );
+
+                        m.style.setProperty(
+                            "--my",
+                            "0px"
+                        );
+                    }
+                });
+            });
+            document.getElementById("close").onclick = closePhoto; document.getElementById("prev").onclick = prev; document.getElementById("next").onclick = next; viewer.onclick = e => { if (e.target === viewer) closePhoto() }; document.addEventListener("keydown", e => { if (!viewer.classList.contains("open")) return; if (e.key === "Escape") closePhoto(); if (e.key === "ArrowLeft") prev(); if (e.key === "ArrowRight") next() });
+            document.getElementById("back").onclick = () => { if (history.length > 1) history.back(); else location.href = "../../index.html" };
+            async function load() { try { const res = await fetch("./photos-secrets.json", { cache: "no-store" }); if (!res.ok) throw new Error(`Could not load photos data: ${res.status}`); const data = await res.json(); if (!data || !Array.isArray(data.memories)) throw new Error("Invalid photos JSON structure."); memories = data.memories; if (data.intro?.line) introLine.textContent = data.intro.line; createStars(); memories.forEach(createMemory); loading.remove() } catch (err) { console.error("Photos data could not be loaded:", err); loading.textContent = "Could not load memories." } }
+            load().then(() => {
+                setTimeout(() => {
+                    intro.classList.add("hidden");
+                    setTimeout(() => app.classList.add("visible"), 500);
+                }, 3000);
+            });
+        })();
+    </script>
+</body>
+
+</html>

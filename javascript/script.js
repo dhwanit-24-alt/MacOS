@@ -513,6 +513,27 @@ if (open_music) {
 }
 
 
+/* =========================================================
+   PHOTOS APP
+   ========================================================= */
+
+var open_photos =
+  document.querySelector(".open_photos");
+
+if (open_photos) {
+
+  open_photos.addEventListener(
+    "click",
+    function () {
+
+      window.location.href =
+        "apps/photos/photos.html";
+
+    }
+  );
+
+}
+
 if (adding) {
   adding.addEventListener(
     "click",
