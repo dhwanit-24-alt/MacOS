@@ -1246,11 +1246,11 @@ li>.menu__container>.grid__controling .control_center--grid {
 }
 
 .dock .icon:nth-child(5):hover::after {
-  content: "Itunes music";
+  content: "Spotify";
 }
 
 .dock .icon:nth-child(6):hover::after {
-  content: "VScode";
+  content: "Photos";
 }
 
 .dock .icon:nth-child(7):hover::after {
