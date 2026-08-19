@@ -17,7 +17,6 @@ apps/music/songs/*
 apps/music/lyrics/*
 apps/photos/photos-secrets.json
 apps/photos/images/*
-
 # =========================================================
 # KEEP THESE FOLDERS' CODE / STRUCTURE IF NEEDED
 # =========================================================

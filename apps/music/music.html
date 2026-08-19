@@ -1072,424 +1072,431 @@
          ========================================================= -->
 
     <script>
-
         (() => {
-
             "use strict";
-
 
             /* =====================================================
                ELEMENTS
                ===================================================== */
 
-            const intro =
-                document.getElementById(
-                    "musicIntro"
-                );
-
-            const app =
-                document.getElementById(
-                    "musicApp"
-                );
-
-            const backButton =
-                document.getElementById(
-                    "backButton"
-                );
-
-            const audio =
-                document.getElementById(
-                    "audio"
-                );
-
-            const artwork =
-                document.getElementById(
-                    "artwork"
-                );
-
-            const songTitle =
-                document.getElementById(
-                    "songTitle"
-                );
-
-            const songArtist =
-                document.getElementById(
-                    "songArtist"
-                );
-
-            const songReason =
-                document.getElementById(
-                    "songReason"
-                );
-
-            const playButton =
-                document.getElementById(
-                    "playButton"
-                );
-
-            const playIcon =
-                document.getElementById(
-                    "playIcon"
-                );
-
-            const previousButton =
-                document.getElementById(
-                    "previousButton"
-                );
-
-            const nextButton =
-                document.getElementById(
-                    "nextButton"
-                );
-
-            const progressTrack =
-                document.getElementById(
-                    "progressTrack"
-                );
-
-            const progressFill =
-                document.getElementById(
-                    "progressFill"
-                );
-
-            const currentTime =
-                document.getElementById(
-                    "currentTime"
-                );
-
-            const duration =
-                document.getElementById(
-                    "duration"
-                );
-
-            const songCount =
-                document.getElementById(
-                    "songCount"
-                );
-
+            const intro = document.getElementById("musicIntro");
+            const app = document.getElementById("musicApp");
+            const backButton = document.getElementById("backButton");
+            const audio = document.getElementById("audio");
+            const artwork = document.getElementById("artwork");
+            const songTitle = document.getElementById("songTitle");
+            const songArtist = document.getElementById("songArtist");
+            const songReason = document.getElementById("songReason");
+            const playButton = document.getElementById("playButton");
+            const playIcon = document.getElementById("playIcon");
+            const previousButton = document.getElementById("previousButton");
+            const nextButton = document.getElementById("nextButton");
+            const progressTrack = document.getElementById("progressTrack");
+            const progressFill = document.getElementById("progressFill");
+            const currentTime = document.getElementById("currentTime");
+            const duration = document.getElementById("duration");
+            const songCount = document.getElementById("songCount");
 
             /* =====================================================
                STATE
                ===================================================== */
 
             let songs = [];
-
             let currentSong = 0;
-
             let isPlaying = false;
+            let segmentStart = 0;
+            let segmentEnd = null;
 
-            /*
-             * Each song plays twice before moving
-             * automatically to the next song.
-             */
-            let songPlayCount = 0;
+            const FADE_DURATION = 2;
 
-            const MAX_PLAYS_PER_SONG = 2;
+            let fadeAnimation = null;
+            let fadeTimer = null;
+            let transitionId = 0;
+            let endingSong = false;
+            let changingSong = false;
 
+            audio.volume = 1;
 
             /* =====================================================
                FORMAT TIME
                ===================================================== */
 
             function formatTime(seconds) {
-
-                if (
-                    !Number.isFinite(seconds)
-                ) {
+                if (!Number.isFinite(seconds)) {
                     return "0:00";
                 }
 
-
-                const minutes =
-                    Math.floor(
-                        seconds / 60
-                    );
-
-                const remaining =
-                    Math.floor(
-                        seconds % 60
-                    );
-
+                const minutes = Math.floor(seconds / 60);
+                const remaining = Math.floor(seconds % 60);
 
                 return (
                     minutes +
                     ":" +
-                    String(
-                        remaining
-                    ).padStart(
-                        2,
-                        "0"
-                    )
+                    String(remaining).padStart(2, "0")
                 );
             }
 
+            function parseTime(value) {
+                if (
+                    typeof value !== "string" ||
+                    !/^\d{1,2}:\d{2}$/.test(value)
+                ) {
+                    return null;
+                }
+
+                const [minutes, seconds] =
+                    value.split(":").map(Number);
+
+                if (
+                    !Number.isFinite(minutes) ||
+                    !Number.isFinite(seconds) ||
+                    seconds >= 60
+                ) {
+                    return null;
+                }
+
+                return minutes * 60 + seconds;
+            }
+
+            /* =====================================================
+               TIMER / FADE CLEANUP
+               ===================================================== */
+
+            function cancelFade() {
+                if (fadeAnimation !== null) {
+                    cancelAnimationFrame(fadeAnimation);
+                    fadeAnimation = null;
+                }
+
+                if (fadeTimer !== null) {
+                    clearTimeout(fadeTimer);
+                    fadeTimer = null;
+                }
+            }
+
+            /* =====================================================
+               FADE IN
+               ===================================================== */
+
+            function fadeIn() {
+                cancelFade();
+
+                const startTime = performance.now();
+                const thisTransition = transitionId;
+
+                audio.volume = 0;
+
+                function step(now) {
+                    if (thisTransition !== transitionId) {
+                        return;
+                    }
+
+                    const progress = Math.min(
+                        1,
+                        (now - startTime) /
+                        (FADE_DURATION * 1000)
+                    );
+
+                    audio.volume = progress;
+
+                    if (progress < 1 && !audio.paused) {
+                        fadeAnimation =
+                            requestAnimationFrame(step);
+                    } else if (progress >= 1) {
+                        audio.volume = 1;
+                        fadeAnimation = null;
+                    }
+                }
+
+                fadeAnimation =
+                    requestAnimationFrame(step);
+            }
+
+            /* =====================================================
+               FADE OUT + EXACT SEGMENT STOP
+               ===================================================== */
+
+            function finishCurrentSong(force = false) {
+                if (endingSong && !force) {
+                    return;
+                }
+
+                endingSong = true;
+                cancelFade();
+
+                audio.pause();
+                audio.volume = 0;
+
+                if (segmentEnd !== null) {
+                    try {
+                        audio.currentTime = segmentEnd;
+                    } catch (_) {
+                        // Ignore seek errors during source changes.
+                    }
+                }
+
+                /*
+                 * The current song has finished exactly once.
+                 * Move directly to the next song and autoplay it.
+                 */
+                loadSong(currentSong + 1, true);
+            }
+
+            function beginFadeOut() {
+                if (endingSong || segmentEnd === null) {
+                    return;
+                }
+
+                endingSong = true;
+                cancelFade();
+
+                const thisTransition = transitionId;
+                const fadeStart = Math.max(
+                    segmentStart,
+                    segmentEnd - FADE_DURATION
+                );
+
+                const remaining = Math.max(
+                    0,
+                    segmentEnd - audio.currentTime
+                );
+
+                const startVolume = audio.volume;
+                const startTime = performance.now();
+                const fadeDuration = Math.min(
+                    FADE_DURATION,
+                    remaining
+                );
+
+                function fadeStep(now) {
+                    if (thisTransition !== transitionId) {
+                        return;
+                    }
+
+                    const progress = Math.min(
+                        1,
+                        (now - startTime) /
+                        (fadeDuration * 1000)
+                    );
+
+                    audio.volume =
+                        startVolume * (1 - progress);
+
+                    if (progress < 1) {
+                        fadeAnimation =
+                            requestAnimationFrame(fadeStep);
+                    } else {
+                        fadeAnimation = null;
+                    }
+                }
+
+                /*
+                 * Stop exactly at the JSON end point.
+                 * The fade animation and the hard stop are separate so
+                 * audio can never continue beyond the selected endpoint.
+                 */
+                fadeAnimation =
+                    requestAnimationFrame(fadeStep);
+
+                fadeTimer = setTimeout(() => {
+                    if (thisTransition !== transitionId) {
+                        return;
+                    }
+
+                    fadeTimer = null;
+                    finishCurrentSong(true);
+                }, remaining * 1000);
+            }
 
             /* =====================================================
                LOAD PRIVATE SONG DATA
                ===================================================== */
 
             async function loadMusicData() {
-
                 try {
-
-                    const response =
-                        await fetch(
-                            "./music-secrets.json",
-                            {
-                                cache:
-                                    "no-store"
-                            }
-                        );
-
+                    const response = await fetch(
+                        "./music-secrets.json",
+                        { cache: "no-store" }
+                    );
 
                     if (!response.ok) {
-
                         throw new Error(
                             `Could not load music data: ${response.status}`
                         );
                     }
 
-
-                    const data =
-                        await response.json();
-
+                    const data = await response.json();
 
                     if (
                         !data ||
-                        !Array.isArray(
-                            data.songs
-                        )
+                        !Array.isArray(data.songs)
                     ) {
-
                         throw new Error(
                             "Invalid music JSON structure."
                         );
                     }
 
-
-                    if (
-                        data.songs.length === 0
-                    ) {
-
+                    if (data.songs.length === 0) {
                         throw new Error(
                             "No songs found in music JSON."
                         );
                     }
 
-
-                    songs =
-                        data.songs;
-
-
+                    songs = data.songs;
                     songCount.textContent =
                         `1 / ${songs.length}`;
 
-
-                    loadSong(
-                        0,
-                        false
-                    );
-
-
+                    loadSong(0, false);
                 } catch (error) {
-
                     console.error(
                         "Music data could not be loaded:",
                         error
                     );
 
-
                     songTitle.textContent =
                         "Music could not be loaded";
-
-                    songArtist.textContent =
-                        "";
-
+                    songArtist.textContent = "";
                     songReason.textContent =
                         "Please check music-secrets.json.";
-
-                    songCount.textContent =
-                        "0 / 0";
+                    songCount.textContent = "0 / 0";
                 }
             }
-
 
             /* =====================================================
                LOAD SONG
                ===================================================== */
 
-            function loadSong(
-                index,
-                animate = true
-            ) {
+            function loadSong(index, autoplay = false) {
+                if (!songs.length) return;
 
-                if (
-                    !songs.length
-                ) {
-                    return;
+                transitionId++;
+                const thisTransition = transitionId;
+
+                cancelFade();
+
+                endingSong = false;
+                changingSong = true;
+
+                currentSong = (index + songs.length) % songs.length;
+
+                const song = songs[currentSong];
+
+                audio.pause();
+                isPlaying = false;
+                updatePlayIcon();
+
+                songTitle.textContent = song.title || "Untitled";
+                songArtist.textContent = song.artist || "";
+                songReason.textContent = song.reason || "";
+                artwork.src = song.lyrics || "";
+
+                const parsedStart = parseTime(song.start);
+                const parsedEnd = parseTime(song.end);
+                artwork.style.objectFit = song.fit === "contain" ? "contain" : "cover";
+                segmentStart = parsedStart !== null ? parsedStart : 0;
+                segmentEnd = parsedEnd !== null && parsedEnd > segmentStart ? parsedEnd : null;
+
+                audio.src = song.audio || "";
+                audio.load();
+
+                songCount.textContent = `${currentSong + 1} / ${songs.length}`;
+                currentTime.textContent = "0:00";
+                duration.textContent = segmentEnd !== null ? formatTime(segmentEnd - segmentStart) : "0:00";
+                progressFill.style.width = "0%";
+
+                changingSong = false;
+
+                if (autoplay) {
+                    if (audio.readyState >= 3) {
+                        startPlayback(thisTransition);
+                    } else {
+                        audio.addEventListener("canplay", function onCanPlay() {
+                            audio.removeEventListener("canplay", onCanPlay);
+                            if (thisTransition === transitionId) {
+                                startPlayback(thisTransition);
+                            }
+                        });
+                    }
                 }
-
-
-                currentSong =
-                    (
-                        index +
-                        songs.length
-                    ) %
-                    songs.length;
-
-
-                const song =
-                    songs[
-                    currentSong
-                    ];
-
-
-                if (animate) {
-
-                    artwork.classList.add(
-                        "changing"
-                    );
-                }
-
-
-                const changeDelay =
-                    animate
-                        ? 220
-                        : 0;
-
-
-                setTimeout(
-                    () => {
-
-                        songTitle.textContent =
-                            song.title ||
-                            "Untitled";
-
-                        songArtist.textContent =
-                            song.artist ||
-                            "";
-
-                        songReason.textContent =
-                            song.reason ||
-                            "";
-
-                        artwork.src =
-                            song.lyrics ||
-                            "";
-
-                        audio.src =
-                            song.audio ||
-                            "";
-
-                        songCount.textContent =
-                            `${currentSong + 1} / ${songs.length}`;
-
-
-                        currentTime.textContent =
-                            "0:00";
-
-                        duration.textContent =
-                            "0:00";
-
-                        progressFill.style.width =
-                            "0%";
-
-
-                        audio.load();
-
-
-                        if (animate) {
-
-                            requestAnimationFrame(
-                                () => {
-
-                                    artwork.classList.remove(
-                                        "changing"
-                                    );
-
-                                }
-                            );
-                        }
-
-                    },
-                    changeDelay
-                );
             }
 
+
+            /* =====================================================
+               START PLAYBACK
+               ===================================================== */
+
+            async function startPlayback(expectedTransition = transitionId) {
+                if (
+                    expectedTransition !== transitionId ||
+                    !audio.src
+                ) {
+                    return false;
+                }
+
+                try {
+                    await audio.play();
+
+                    if (expectedTransition !== transitionId) {
+                        return false;
+                    }
+
+                    isPlaying = true;
+                    updatePlayIcon();
+                    fadeIn();
+                    return true;
+                } catch (error) {
+                    console.log(
+                        "Audio could not autoplay/play:",
+                        error
+                    );
+
+                    isPlaying = false;
+                    updatePlayIcon();
+                    return false;
+                }
+            }
 
             /* =====================================================
                PLAY / PAUSE
                ===================================================== */
 
             async function togglePlay() {
-
-                if (
-                    !audio.src
-                ) {
+                if (!audio.src) {
                     return;
                 }
 
-
-                if (
-                    audio.paused
-                ) {
-
-                    try {
-
-                        await audio.play();
-
-                        isPlaying =
-                            true;
-
-                        updatePlayIcon();
-
-                    } catch (error) {
-
-                        console.error(
-                            "Audio could not play:",
-                            error
-                        );
-                    }
-
+                if (audio.paused) {
+                    endingSong = false;
+                    await startPlayback();
                     return;
                 }
 
-
+                cancelFade();
                 audio.pause();
-
-                isPlaying =
-                    false;
-
+                audio.volume = 1;
+                isPlaying = false;
                 updatePlayIcon();
             }
-
 
             /* =====================================================
                PLAY ICON
                ===================================================== */
 
             function updatePlayIcon() {
-
-                if (
-                    isPlaying
-                ) {
-
+                if (isPlaying) {
                     playIcon.innerHTML = `
                         <path
                             d="M7 5h4v14H7V5Zm6 0h4v14h-4V5Z"
                         />
                     `;
 
-
                     playButton.setAttribute(
                         "aria-label",
                         "Pause"
                     );
 
-
                     return;
                 }
-
 
                 playIcon.innerHTML = `
                     <path
@@ -1497,160 +1504,49 @@
                     />
                 `;
 
-
                 playButton.setAttribute(
                     "aria-label",
                     "Play"
                 );
             }
 
-
             /* =====================================================
                NEXT
                ===================================================== */
 
-            function nextSong() {
-
-                if (
-                    !songs.length
-                ) {
+            function nextSong(autoplayOverride = null) {
+                if (!songs.length || changingSong) {
                     return;
                 }
 
-
                 const wasPlaying =
-                    !audio.paused;
+                    isPlaying && !audio.paused;
 
+                const shouldAutoplay =
+                    autoplayOverride !== null
+                        ? autoplayOverride
+                        : wasPlaying;
 
-                /*
-                 * Starting a new song always
-                 * resets its two-play counter.
-                 */
-                songPlayCount = 0;
-
-
-                /*
-                 * loadSong() already wraps:
-                 *
-                 * Song 21 + 1 → Song 1
-                 */
                 loadSong(
-                    currentSong + 1
+                    currentSong + 1,
+                    shouldAutoplay
                 );
-
-
-                if (
-                    wasPlaying
-                ) {
-
-                    setTimeout(
-                        () => {
-
-                            audio
-                                .play()
-                                .then(() => {
-
-                                    isPlaying = true;
-
-                                    updatePlayIcon();
-
-                                })
-                                .catch(
-                                    console.error
-                                );
-
-                        },
-                        300
-                    );
-
-                } else {
-
-                    isPlaying = false;
-
-                    updatePlayIcon();
-
-                }
             }
-
 
             /* =====================================================
                PREVIOUS
                ===================================================== */
 
             function previousSong() {
+                if (!songs.length || changingSong) return;
 
-                if (
-                    !songs.length
-                ) {
-                    return;
-                }
+                const wasPlaying = isPlaying && !audio.paused;
 
+                cancelFade();
+                endingSong = false;
 
-                /*
-                 * If the current song has already
-                 * progressed for more than 3 seconds,
-                 * pressing previous simply restarts it.
-                 */
-
-                if (
-                    audio.currentTime > 3
-                ) {
-
-                    audio.currentTime =
-                        0;
-
-                    return;
-                }
-
-
-                const wasPlaying =
-                    !audio.paused;
-
-                /*
-                 * Previous starts the selected song
-                 * from the beginning of its two-play cycle.
-                 */
-                songPlayCount = 0;
-
-                loadSong(
-                    currentSong - 1
-                );
-
-
-                if (
-                    wasPlaying
-                ) {
-
-                    setTimeout(
-                        () => {
-
-                            audio
-                                .play()
-                                .then(() => {
-
-                                    isPlaying =
-                                        true;
-
-                                    updatePlayIcon();
-
-                                })
-                                .catch(
-                                    console.error
-                                );
-
-                        },
-                        300
-                    );
-
-                } else {
-
-                    isPlaying =
-                        false;
-
-                    updatePlayIcon();
-                }
+                loadSong(currentSong - 1, wasPlaying);
             }
-
 
             /* =====================================================
                AUDIO PROGRESS
@@ -1659,33 +1555,68 @@
             audio.addEventListener(
                 "timeupdate",
                 () => {
-
                     if (
-                        !audio.duration
+                        !Number.isFinite(
+                            audio.currentTime
+                        )
                     ) {
                         return;
                     }
 
+                    if (
+                        segmentEnd !== null &&
+                        !endingSong
+                    ) {
+                        const fadeStart =
+                            Math.max(
+                                segmentStart,
+                                segmentEnd -
+                                FADE_DURATION
+                            );
 
-                    const percentage =
-                        (
-                            audio.currentTime /
-                            audio.duration
-                        ) *
-                        100;
+                        if (
+                            audio.currentTime >=
+                            fadeStart
+                        ) {
+                            beginFadeOut();
+                            return;
+                        }
+                    }
 
+                    const elapsed = Math.max(
+                        0,
+                        audio.currentTime -
+                        segmentStart
+                    );
+
+                    const segmentDuration =
+                        Math.max(
+                            0,
+                            segmentEnd !== null
+                                ? segmentEnd -
+                                segmentStart
+                                : audio.duration -
+                                segmentStart
+                        );
+
+                    if (segmentDuration <= 0) {
+                        return;
+                    }
+
+                    const percentage = Math.min(
+                        100,
+                        (elapsed /
+                            segmentDuration) *
+                        100
+                    );
 
                     progressFill.style.width =
                         `${percentage}%`;
 
-
                     currentTime.textContent =
-                        formatTime(
-                            audio.currentTime
-                        );
+                        formatTime(elapsed);
                 }
             );
-
 
             /* =====================================================
                AUDIO METADATA
@@ -1694,63 +1625,58 @@
             audio.addEventListener(
                 "loadedmetadata",
                 () => {
+                    if (!audio.src) {
+                        return;
+                    }
+
+                    if (
+                        segmentEnd === null ||
+                        segmentEnd > audio.duration
+                    ) {
+                        segmentEnd = audio.duration;
+                    }
+
+                    try {
+                        audio.currentTime = Math.min(
+                            segmentStart,
+                            audio.duration
+                        );
+                    } catch (_) {
+                        // Metadata may still be settling.
+                    }
 
                     duration.textContent =
                         formatTime(
-                            audio.duration
+                            Math.max(
+                                0,
+                                segmentEnd -
+                                segmentStart
+                            )
                         );
+
+                    currentTime.textContent = "0:00";
+                    progressFill.style.width = "0%";
                 }
             );
 
-
             /* =====================================================
-               AUDIO FINISHED
+               AUDIO ENDED
                ===================================================== */
 
             audio.addEventListener(
                 "ended",
                 () => {
-
-                    /*
-                     * First ending:
-                     * replay the same song.
-                     */
-                    if (
-                        songPlayCount <
-                        MAX_PLAYS_PER_SONG - 1
-                    ) {
-
-                        songPlayCount++;
-
-                        audio.currentTime = 0;
-
-                        audio.play()
-                            .then(() => {
-
-                                isPlaying = true;
-
-                                updatePlayIcon();
-
-                            })
-                            .catch(
-                                console.error
-                            );
-
+                    if (endingSong) {
                         return;
                     }
 
-
                     /*
-                     * Song has now played twice.
-                     * Move to the next song.
+                     * This is only a fallback for songs where the
+                     * selected endpoint is the physical end of the file.
                      */
-                    songPlayCount = 0;
-
-                    nextSong();
-
+                    finishCurrentSong();
                 }
             );
-
 
             /* =====================================================
                PROGRESS BAR CLICK
@@ -1759,32 +1685,41 @@
             progressTrack.addEventListener(
                 "click",
                 (event) => {
-
-                    if (
-                        !audio.duration
-                    ) {
+                    if (!audio.duration) {
                         return;
                     }
-
 
                     const rect =
                         progressTrack.getBoundingClientRect();
 
-
                     const position =
-                        (
-                            event.clientX -
-                            rect.left
-                        ) /
-                        rect.width;
+                        Math.max(
+                            0,
+                            Math.min(
+                                1,
+                                (
+                                    event.clientX -
+                                    rect.left
+                                ) / rect.width
+                            )
+                        );
 
+                    const segmentDuration =
+                        segmentEnd !== null
+                            ? segmentEnd -
+                            segmentStart
+                            : audio.duration -
+                            segmentStart;
+
+                    cancelFade();
+                    endingSong = false;
 
                     audio.currentTime =
+                        segmentStart +
                         position *
-                        audio.duration;
+                        segmentDuration;
                 }
             );
-
 
             /* =====================================================
                BUTTONS
@@ -1795,124 +1730,74 @@
                 togglePlay
             );
 
-
             previousButton.addEventListener(
                 "click",
                 previousSong
             );
-
 
             nextButton.addEventListener(
                 "click",
                 nextSong
             );
 
-
             /* =====================================================
                BACK TO DESKTOP
                ===================================================== */
 
             function goBackToDesktop() {
+                cancelFade();
+                cancelLoadTimer();
+                audio.pause();
 
-                if (
-                    window.history.length > 1
-                ) {
-
+                if (window.history.length > 1) {
                     window.history.back();
-
                     return;
                 }
-
 
                 window.location.href =
                     "../../index.html";
             }
-
 
             backButton.addEventListener(
                 "click",
                 goBackToDesktop
             );
 
-
             /* =====================================================
                INTRO → APP
                ===================================================== */
 
-            setTimeout(
-                async () => {
+            setTimeout(() => {
+                intro.classList.add("hidden");
 
-                    intro.classList.add(
-                        "hidden"
-                    );
+                setTimeout(() => {
+                    app.classList.add("visible");
 
+                    /*
+                     * Song 1 always starts fresh.
+                     */
+                    currentSong = 0;
+                    loadSong(0, false);
 
-                    setTimeout(
-                        async () => {
-
-                            app.classList.add(
-                                "visible"
-                            );
-
-
-                            /*
-                             * Song 1 always starts fresh.
-                             */
-                            currentSong = 0;
-
-                            songPlayCount = 0;
-
-                            loadSong(
-                                0,
-                                false
-                            );
-
-
-                            /*
-                             * Start Song 1 automatically.
-                             * The browser may still block autoplay,
-                             * which is outside our control.
-                             */
-                            try {
-
-                                await audio.play();
-
-                                isPlaying = true;
-
-                                updatePlayIcon();
-
-                            } catch (error) {
-
-                                console.log(
-                                    "Autoplay was blocked by the browser.",
-                                    error
-                                );
-
-                                isPlaying = false;
-
-                                updatePlayIcon();
-
-                            }
-
-                        },
-                        500
-                    );
-
-                },
-                3800
-            );
-
+                    /*
+                     * Try to start Song 1 automatically.
+                     * If the browser blocks autoplay, the Play button
+                     * remains available and the app continues normally.
+                     */
+                    setTimeout(() => {
+                        startPlayback();
+                    }, 50);
+                }, 500);
+            }, 3800);
 
             /* =====================================================
                START
                ===================================================== */
 
             loadMusicData();
-
             updatePlayIcon();
 
         })();
-
     </script>
 
 </body>
